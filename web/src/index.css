@@ -1,0 +1,253 @@
+@import "tailwindcss";
+
+/* Light/dark theme tokens, ported from wireframes/styles.css (REQ_FE_081). Toggled by
+   `data-theme="dark"` on the root element; the default (no attribute, or "light") is light. */
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface-2: #f0f2f5;
+  --border: #e4e7ec;
+  --border-strong: #ccd1da;
+  --grid: #eceef2;
+  --text: #171a21;
+  --text-2: #565e6e;
+  --text-3: #667085;
+  --accent: #4338ca;
+  --accent-soft: #eceefe;
+  --accent-text: #ffffff;
+  --danger: #c4262e;
+  --danger-soft: #fdecec;
+  --ok: #1a7f4b;
+  --milestone: #d92d3a;
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, .06), 0 1px 3px rgba(16, 24, 40, .08);
+  --shadow-md: 0 4px 12px rgba(16, 24, 40, .08), 0 2px 4px rgba(16, 24, 40, .05);
+  --shadow-lg: 0 24px 60px rgba(16, 24, 40, .22), 0 6px 16px rgba(16, 24, 40, .1);
+  --overlay: rgba(15, 18, 24, .5);
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --panel-w: 336px;
+  --tooltip-bg: #171a21;
+  --tooltip-fg: #ffffff;
+}
+:root[data-theme="dark"] {
+  --bg: #0e1116;
+  --surface: #171b23;
+  --surface-2: #1f242e;
+  --border: #2a303c;
+  --border-strong: #3a4252;
+  --grid: #222834;
+  --text: #e8ebf1;
+  --text-2: #a7afbe;
+  --text-3: #8b94a5;
+  --accent: #a5abff;
+  --accent-soft: #262b4d;
+  --accent-text: #10122b;
+  --danger: #ff7a80;
+  --danger-soft: #3a1d20;
+  --ok: #55d08d;
+  --milestone: #ff5a63;
+  --tooltip-bg: #e8ebf1;
+  --tooltip-fg: #171a21;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, .4);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, .6);
+  --overlay: rgba(0, 0, 0, .6);
+}
+
+/* Tailwind 4 CSS-first theme: maps the tokens above to utility classes (bg-bg, text-text, ...)
+   so both themes work through ordinary Tailwind classes, not just literal color values. */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-grid: var(--grid);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-text: var(--accent-text);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-ok: var(--ok);
+  --color-milestone: var(--milestone);
+  --font-sans: var(--font);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== Shared component styles, ported from wireframes/styles.css (10b root cause) =====
+   The wireframe's component rules were never ported, so components using these class names
+   (btn, inp, field, hint, kv, ...) rendered unstyled. Wireframe variables map 1:1 onto the tokens
+   above, so light and dark both follow `data-theme`. The rules live in Tailwind's `components`
+   cascade layer: they sit above Tailwind's preflight (base) but below its utilities, so a utility
+   in the same className (e.g. `inp ... px-2 py-1`, `btn ghost text-xs`) still wins. */
+@layer components {
+  .btn { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 9px; border: 1px solid var(--border); background: var(--surface); font-weight: 500; cursor: pointer; white-space: nowrap; transition: background .15s, border-color .15s; }
+  .btn:hover { background: var(--surface-2); }
+  .btn.ghost { border-color: transparent; background: transparent; }
+  .btn.ghost:hover { background: var(--surface-2); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn.danger { color: var(--danger); border-color: var(--danger-soft); background: var(--danger-soft); }
+  .btn.active { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+  .btn.icon { width: 34px; padding: 0; justify-content: center; }
+  .btn.sm { height: 28px; padding: 0 9px; font-size: 13px; border-radius: 8px; }
+  .link-list + .btn { margin-top: 6px; }
+
+  .panel { width: 336px; flex: none; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-md); padding: 20px; position: sticky; top: 16px; }
+  .panel .p-head { display: flex; align-items: flex-start; gap: 8px; }
+  .panel .p-head .btn { flex: none; }
+  .panel h2 { margin: 0; font-size: 20px; line-height: 1.25; letter-spacing: -.01em; flex: 1; }
+  .panel .swatch-line { height: 4px; border-radius: 4px; margin: 14px 0; }
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+  .resizer { width: 20px; flex: none; align-self: stretch; cursor: col-resize; position: relative; touch-action: none; outline: none; }
+  .resizer::after { content: ""; position: absolute; left: 9px; top: 0; bottom: 0; width: 2px; border-radius: 2px; background: transparent; transition: background .15s; }
+  .resizer .grip { position: absolute; top: 88px; left: 3px; width: 14px; height: 40px; border-radius: 7px; background: var(--surface); border: 1px solid var(--border-strong); display: grid; place-items: center; color: var(--text-3); box-shadow: var(--shadow-sm); z-index: 1; }
+  .resizer:hover::after, .resizer.drag::after, .resizer:focus-visible::after { background: var(--accent); }
+  .resizer:hover .grip, .resizer.drag .grip, .resizer:focus-visible .grip { color: var(--accent); border-color: var(--accent); }
+
+  .kv { display: grid; grid-template-columns: 92px 1fr; row-gap: 9px; font-size: 13px; }
+  .kv dt { color: var(--text-3); }
+  .kv dd { margin: 0; }
+
+  .tag { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); font-size: 12px; color: var(--text-2); white-space: nowrap; }
+  .tag.accent { background: var(--accent-soft); color: var(--accent); }
+
+  .rich { font-size: 14px; color: var(--text); }
+  .rich p { margin: 0 0 10px; }
+  .rich ul, .rich ol { margin: 0 0 10px; padding-left: 20px; }
+  .rich li { margin: 2px 0; }
+  .rich h3 { margin: 14px 0 6px; font-size: 16px; font-weight: 650; }
+  .rich u { text-decoration: underline; }
+  .rich s { text-decoration: line-through; }
+  .rich h4 { margin: 14px 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-3); }
+  .rich blockquote { margin: 0 0 10px; padding-left: 12px; border-left: 3px solid var(--border-strong); color: var(--text-2); }
+
+  .riskbox { display: flex; gap: 10px; margin-top: 14px; padding: 10px 12px; border-radius: 10px; background: var(--danger-soft); color: var(--text); border-left: 4px solid #d92d3a; font-size: 13px; }
+  .riskbox > svg { color: #d92d3a; margin-top: 2px; }
+
+  .link-list { display: flex; flex-direction: column; gap: 6px; }
+  .link-item { display: inline-flex; align-items: center; gap: 6px; color: var(--accent, #2f6bd7); text-decoration: none; font-size: 13px; }
+  .link-item:hover { text-decoration: underline; }
+  .link-item .host { color: var(--text-3); font-size: 12px; }
+
+  /* Side panel additions (REQ_FE_110/112/113): not in wireframes/styles.css under these names or only inline there. */
+  .panel-card { align-self: flex-start; margin: 16px 16px 16px 0; max-height: calc(100% - 32px); overflow-y: auto; }
+  .tagrow { display: flex; flex-wrap: wrap; gap: 6px; }
+  .dep-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; background: var(--surface-2); font-size: 13px; margin-bottom: 6px; }
+  .dep-item .team { color: var(--text-3); margin-left: auto; font-size: 12px; }
+  .gap-note { font-size: 11px; font-weight: 600; color: #8a4b00; background: #fff7e0; border: 1px solid #f0c27a; border-radius: 6px; padding: 0 5px; } /* REQ_DEP_039 */
+  :root[data-theme="dark"] .gap-note { background: #3a2a0c; color: #ffc46b; border-color: #6b4a14; }
+  .health-chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface); font-size: 12.5px; font-weight: 600; color: var(--text); cursor: pointer; } /* REQ_DEP_036 */
+  .health-chip[disabled] { color: var(--text-3); font-weight: 500; cursor: default; }
+  .health-chip.on { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .swatch-dot { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+  .st-tag { gap: 6px; font-weight: 600; }
+  .st-tag.st-planned { border: 1px dashed var(--text-3); color: var(--text-2); background: transparent; }
+  .st-tag.st-in_progress { background: var(--accent-soft); color: var(--accent); }
+  .st-tag.st-done { background: color-mix(in srgb, var(--ok) 16%, var(--surface)); color: var(--ok); }
+  .st-tag.st-at_risk { background: var(--danger-soft); color: var(--danger); }
+
+  /* form controls */
+  .field > label, .lab { display: block; font-size: 12px; font-weight: 650; text-transform: uppercase; letter-spacing: .06em; color: var(--text-3); margin-bottom: 6px; }
+  .field label.wschip { display: inline-flex; text-transform: none; letter-spacing: 0; font-size: 13px; font-weight: 500; color: var(--text-2); margin: 0; }
+  .field label.wschip.on { color: var(--text); font-weight: 600; }
+  .inp { width: 100%; height: 34px; padding: 0 10px; border-radius: 9px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); min-width: 0; }
+  .inp:focus, .editor .content:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .inp.bad { border-color: var(--danger); }
+  .inp.risk-note { background: var(--danger-soft); border-color: var(--danger); }
+  .inp.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; }
+  textarea.inp { height: auto; padding: 8px 10px; margin-top: 8px; resize: vertical; }
+  .hint { font-size: 12px; color: var(--text-3); margin-top: 6px; }
+  .hint.bad { color: var(--danger); font-weight: 500; }
+
+  .pv { display: inline-flex; align-items: center; height: 32px; padding: 0 14px; border-radius: 9px; font-weight: 600; font-size: 12.5px; border: 1.5px solid rgba(0,0,0,.16); box-shadow: 0 1px 2px rgba(16,24,40,.16); }
+  .form-foot { display: flex; justify-content: flex-end; gap: 8px; position: sticky; bottom: -20px; padding: 12px 0 0; background: linear-gradient(transparent, var(--surface) 30%); }
+  .segs.bad, .tiles.bad, .wschips.bad { outline: 1px solid var(--danger); outline-offset: 3px; border-radius: 9px; }
+  .editor.bad { border-color: var(--danger); }
+  .editor:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .editor .ProseMirror { outline: none; min-height: 106px; }
+  .wschip:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .segs {  display: flex; flex-wrap: wrap; gap: 6px; }
+  .st-opt { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 9px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-2); font: inherit; font-size: 12.5px; cursor: pointer; position: static; width: auto; box-shadow: none; }
+  .st-opt.on { background: var(--accent-soft); border-color: var(--accent); color: var(--text); font-weight: 600; }
+  .st-opt.st-risk.on { background: var(--danger-soft); border-color: #d92d3a; }
+
+  .swatches { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .swatches i, .swatches button { padding: 0; cursor: pointer; width: 28px; height: 28px; border-radius: 9px; border: 2px solid transparent; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); display: block; }
+  .swatches .on { border-color: var(--surface); box-shadow: 0 0 0 2px var(--accent), inset 0 0 0 1px rgba(0,0,0,.15); }
+  .swatches i.custom { background: conic-gradient(#ef4444, #f59e0b, #10b981, #3b82f6, #8b5cf6, #ef4444); }
+
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(36px, 1fr)); gap: 6px; }
+  .tile { height: 34px; border: 1px solid var(--border); border-radius: 9px; display: grid; place-items: center; cursor: pointer; color: var(--text-2); background: var(--surface); padding: 0; }
+  .tile:hover { background: var(--surface-2); }
+  .tile.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+  .wschips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .wschip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--border); color: var(--text-2); cursor: pointer; }
+  .wschip.on { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+  .cb { width: 16px; height: 16px; border-radius: 5px; border: 1.5px solid var(--border-strong); display: grid; place-items: center; flex: none; }
+  .wschip.on .cb { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+
+  .editor { border: 1px solid var(--border-strong); border-radius: 10px; overflow: hidden; }
+  .editor .tb { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: 6px; border-bottom: 1px solid var(--border); background: var(--surface-2); }
+  .editor .tb .btn { width: 36px; height: 34px; padding: 0; justify-content: center; }
+  .editor .tb .sp { width: 1px; align-self: stretch; background: var(--border-strong); margin: 4px 6px; }
+  .editor .tb .tb-select { height: 34px; padding: 0 6px; border-radius: 9px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; font-size: 13px; cursor: pointer; }
+  .editor .tb .tb-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .editor .content { padding: 12px 14px; min-height: 130px; }
+
+  /* top bar and zoom row (wireframe "top stripe", .switch/.seg/.avatar and round 5-8 zoom row) */
+  .topbar { height: 52px; display: flex; align-items: center; gap: 8px; padding: 0 16px; background: var(--surface); border-bottom: 1px solid var(--border); box-shadow: var(--shadow-sm); position: relative; z-index: 30; white-space: nowrap; }
+  .logo { width: 30px; height: 30px; border-radius: 9px; background: var(--accent); color: var(--accent-text); display: grid; place-items: center; flex: none; }
+  .sep { width: 1px; height: 22px; background: var(--border); margin: 0 4px; flex: none; }
+  .spacer { flex: 1; }
+  .select { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 10px; border-radius: 9px; border: 1px solid var(--border); background: var(--surface); font-weight: 500; }
+  .select .muted { color: var(--text-3); font-weight: 400; }
+  a.select { cursor: pointer; }
+  .range { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px; border-radius: 9px; border: 1px solid var(--border); background: var(--surface); font-variant-numeric: tabular-nums; }
+  .range .arrow { color: var(--text-3); }
+  .switch { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; color: var(--text-2); cursor: pointer; position: relative; }
+  button.switch { border: 0; background: transparent; padding: 0; font: inherit; font-weight: 500; text-align: left; -webkit-appearance: none; appearance: none; }
+  .switch .track { width: 30px; height: 18px; border-radius: 999px; background: var(--border-strong); position: relative; transition: background .15s; flex: none; }
+  .switch .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.3); transition: left .15s; }
+  .switch.on { color: var(--text); }
+  .switch.on .track { background: var(--accent); }
+  .switch.on .track::after { left: 14px; }
+  .switch.disabled { opacity: .55; cursor: not-allowed; pointer-events: auto; }
+  .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font-weight: 700; font-size: 12px; }
+
+  .seg { display: inline-flex; padding: 3px; border-radius: 10px; background: var(--surface-2); gap: 2px; }
+  .seg span, .seg a { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border-radius: 8px; color: var(--text-2); font-weight: 500; }
+  .seg span.on, .seg a.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+  .seg button { display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; color: var(--text-2); font: inherit; font-weight: 500; cursor: pointer; }
+  .seg button.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+  .zoombar { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-bottom: 10px; color: var(--text-2); font-size: 12.5px; font-weight: 500; }
+  .zoombar > button:last-of-type { margin-right: auto; } /* the left-hand buttons (team roadmap, trace) push the zoom right */
+
+  /* Manage workstreams page (REQ_FE_105-107, wireframes/workstreams-manage.html): a list row, its grip, and the
+     lifted / drop-line states of a drag. */
+  .ws-row { position: relative; display: flex; align-items: center; gap: 10px; padding: 8px 10px; margin-bottom: 8px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+  .ws-row .grip { display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 8px; background: transparent; color: var(--text-3); cursor: grab; touch-action: none; }
+  .ws-row .grip:hover, .ws-row .grip:focus-visible { background: var(--surface-2); color: var(--accent); }
+  .ws-row .pos { width: 22px; text-align: right; color: var(--text-3); font-variant-numeric: tabular-nums; }
+  .ws-row .nm { flex: 1; min-width: 0; font-weight: 600; }
+  .ws-row span.nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ws-row .ct { color: var(--text-3); font-size: 12.5px; white-space: nowrap; }
+  .ws-row.drag { box-shadow: var(--shadow-md); border-color: var(--accent); z-index: 1; }
+  .ws-row.drop-above::before, .ws-row.drop-below::after { content: ""; position: absolute; left: 0; right: 0; height: 2px; border-radius: 2px; background: var(--accent); }
+  .ws-row.drop-above::before { top: -5px; }
+  .ws-row.drop-below::after { bottom: -5px; }
+}

@@ -1,0 +1,25 @@
+# systemd unit for Overlens on Linux. Install steps are in docs/DEPLOY.md ("Linux route").
+[Unit]
+Description=Overlens
+After=network.target
+
+[Service]
+Type=simple
+User=roadmap
+Group=roadmap
+WorkingDirectory=/var/lib/roadmap
+ExecStart=/opt/roadmap/roadmap -config /etc/roadmap/roadmap.conf
+Restart=on-failure
+RestartSec=5
+# The program shuts down gracefully on SIGTERM within 10 seconds.
+TimeoutStopSec=20
+
+# Hardening: the program only needs to write to its data, log and backup folders.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/roadmap /var/log/roadmap /var/backups/roadmap
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,692 @@
+{
+  "format": "e-roadmaps/company",
+  "dates": "relative",
+  "anchor": "2026-10-16",
+  "team_order": [
+    "Product",
+    "Mobile",
+    "Data Engineering",
+    "AI",
+    "Infrastructure"
+  ],
+  "workstream_order": [
+    "Customer Experience",
+    "AI & Data",
+    "Platform & Reliability"
+  ],
+  "teams": [
+    {
+      "team": {
+        "name": "Product",
+        "tag": "PRD",
+        "default_color": "#2f6bd7"
+      },
+      "roadmap": {
+        "title": "Product Roadmap",
+        "workstreams": [
+          {
+            "name": "Customer Experience"
+          },
+          {
+            "name": "AI & Data"
+          },
+          {
+            "name": "Platform & Reliability"
+          }
+        ],
+        "deliverables": [
+          {
+            "key": "onboarding",
+            "name": "Self-Serve Onboarding",
+            "description": "<p>New customers set up their workspace without talking to support.</p><h4>Scope</h4><ul><li>Guided first-run checklist</li><li>Sample data they can delete</li><li>Invite teammates in one step</li></ul><p><b>Done when:</b> most new accounts finish setup on their own.</p>",
+            "responsible": "Jordan Lee",
+            "start_date": -84,
+            "end_date": -29,
+            "status": "done",
+            "risk_note": "",
+            "color": "#6d4fd1",
+            "workstreams": [
+              {
+                "name": "Customer Experience",
+                "row": 0
+              },
+              {
+                "name": "Platform & Reliability",
+                "row": 0
+              }
+            ],
+            "icons": [
+              "star",
+              "users"
+            ],
+            "links": [
+              {
+                "label": "Design document",
+                "url": "https://docs.example.com/design/onboarding"
+              },
+              {
+                "label": "Tracking ticket",
+                "url": "https://tickets.example.com/PRD-12"
+              }
+            ]
+          },
+          {
+            "key": "pricing",
+            "name": "Pricing Page Refresh",
+            "description": "<p>A clearer pricing page with a plan comparison.</p>",
+            "responsible": "",
+            "start_date": -20,
+            "end_date": 21,
+            "status": "in_progress",
+            "risk_note": "",
+            "color": null,
+            "workstreams": [
+              {
+                "name": "Customer Experience",
+                "row": 0
+              }
+            ],
+            "icons": [
+              "scale"
+            ],
+            "links": []
+          },
+          {
+            "key": "billing",
+            "name": "Billing Portal",
+            "description": "<p>Customers see invoices and update their payment details themselves.</p>",
+            "responsible": "Maya Okafor",
+            "start_date": 30,
+            "end_date": 57,
+            "status": "planned",
+            "risk_note": "",
+            "color": null,
+            "workstreams": [
+              {
+                "name": "Customer Experience",
+                "row": 0
+              }
+            ],
+            "icons": [],
+            "links": []
+          },
+          {
+            "key": "referral",
+            "name": "Referral Program",
+            "description": "<p>Customers invite other companies and both get a month free.</p>",
+            "responsible": "Jordan Lee",
+            "start_date": 150,
+            "end_date": 191,
+            "status": "planned",
+            "risk_note": "",
+            "color": null,
+            "workstreams": [
+              {
+                "name": "Customer Experience",
+                "row": 0
+              }
+            ],
+            "icons": [
+              "bulb"
+            ],
+            "links": []
+          }
+        ],
+        "milestones": [
+          {
+            "key": "beta-launch",
+            "name": "Beta launch",
+            "date": 75,
+            "workstream": "Customer Experience",
+            "row": 1,
+            "responsible": "Elena Marsh",
+            "status": "at_risk",
+            "risk_note": "Waiting on the legal review of the beta terms"
+          }
+        ],
+        "dependencies": [
+          {
+            "from": "pricing",
+            "to": "billing"
+          },
+          {
+            "from": "billing",
+            "to": {
+              "milestone": "beta-launch"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "team": {
+        "name": "Mobile",
+        "tag": "MOB",
+        "default_color": "#0f766e"
+      },
+      "roadmap": {
+        "title": "Mobile Roadmap",
+        "workstreams": [
+          {
+            "name": "Customer Experience"
+          },
+          {
+            "name": "AI & Data"
+          },
+          {
+            "name": "Platform & Reliability"
+          }
+        ],
+        "deliverables": [
+          {
+            "key": "mobile-sign-in",
+            "name": "Mobile Sign-in",
+            "description": "<p>The app reuses the new onboarding flow, with <i>biometric</i> sign-in on supported phones.</p>",
+            "responsible": "Sam Rivera",
+            "start_date": -20,
+            "end_date": 7,
+            "status": "at_risk",
+            "risk_note": "The onboarding flow is still changing, so the screens may need a second pass.",
+            "color": "#c2410c",
+            "workstreams": [
+              {
+                "name": "Customer Experience",
+                "row": 0
+              }
+            ],
+            "icons": [
+              "warning"
+            ],
+            "links": [
+              {
+                "label": "Mock-ups",
+                "url": "https://design.example.com/mobile-sign-in"
+              }
+            ]
+          },
+          {
+            "key": "offline",
+            "name": "Offline Mode",
+            "description": "<p>Read and edit plans without a connection; changes sync when the phone is back online.</p>",
+            "responsible": "Lena Fischer",
+            "start_date": 14,
+            "end_date": 69,
+            "status": "planned",
+            "risk_note": "",
+            "color": null,
+            "workstreams": [
+              {
+                "name": "Customer Experience",
+                "row": 0
+              }
+            ],
+            "icons": [],
+            "links": []
+          },
+          {
+            "key": "push",
+            "name": "Push Notifications",
+            "description": "<p>Alerts when something you follow changes.</p>",
+            "responsible": "Lena Fischer",
+            "start_date": 90,
+            "end_date": 117,
+            "status": "planned",
+            "risk_note": "",
+            "color": null,
+            "workstreams": [
+              {
+                "name": "Customer Experience",
+                "row": 0
+              }
+            ],
+            "icons": [],
+            "links": []
+          },
+          {
+            "key": "perf",
+            "name": "App Performance Tuning",
+            "description": "<p>Faster start-up and smoother scrolling on older phones.</p>",
+            "responsible": "Sam Rivera",
+            "start_date": 130,
+            "end_date": 157,
+            "status": "planned",
+            "risk_note": "",
+            "color": null,
+            "workstreams": [
+              {
+                "name": "Platform & Reliability",
+                "row": 0
+              }
+            ],
+            "icons": [],
+            "links": []
+          }
+        ],
+        "milestones": [
+          {
+            "key": "mobile-2",
+            "name": "Mobile 2.0 release",
+            "date": 190,
+            "workstream": "Customer Experience",
+            "row": 0,
+            "responsible": "Elena Marsh",
+            "status": "planned"
+          }
+        ],
+        "dependencies": [
+          {
+            "from": {
+              "external": {
+                "team": "Product",
+                "name": "Self-Serve Onboarding"
+              }
+            },
+            "to": "mobile-sign-in"
+          },
+          {
+            "from": "mobile-sign-in",
+            "to": "offline"
+          }
+        ]
+      }
+    },
+    {
+      "team": {
+        "name": "Data Engineering",
+        "tag": "DAT",
+        "default_color": "#7048e8"
+      },
+      "roadmap": {
+        "title": "Data Engineering Roadmap",
+        "workstreams": [
+          {
+            "name": "Customer Experience"
+          },
+          {
+            "name": "AI & Data"
+          },
+          {
+            "name": "Platform & Reliability"
+          }
+        ],
+        "deliverables": [
+          {
+            "key": "events",
+            "name": "Event Pipeline",
+            "description": "<p>One stream of product events that every team can read.</p>",
+            "responsible": "Taylor Chen",
+            "start_date": -75,
+            "end_date": -20,
+            "status": "done",
+            "risk_note": "",
+            "color": null,
+            "workstreams": [
+              {
+                "name": "AI & Data",
+                "row": 0
+              }
+            ],
+            "icons": [
+              "bulb"
+            ],
+            "links": [
+              {
+                "label": "Requirements",
+                "url": "https://docs.example.com/requirements/event-pipeline"
+              }
+            ]
+          },
+          {
+            "key": "warehouse",
+            "name": "Warehouse Cutover",
+            "description": "<p>Move reporting to the new data warehouse.</p>",
+            "responsible": "Priya Nair",
+            "start_date": -10,
+            "end_date": 31,
+            "status": "in_progress",
+            "risk_note": "",
+            "color": null,
+            "workstreams": [
+              {
+                "name": "AI & Data",
+                "row": 0
+              }
+            ],
+            "icons": [],
+            "links": []
+          },
+          {
+            "key": "usage",
+            "name": "Usage Dashboard",
+            "description": "<p>Weekly usage figures for account managers.</p>",
+            "responsible": "Taylor Chen",
+            "start_date": 40,
+            "end_date": 53,
+            "status": "planned",
+            "risk_note": "",
+            "color": null,
+            "workstreams": [
+              {
+                "name": "AI & Data",
+                "row": 0
+              }
+            ],
+            "icons": [],
+            "links": []
+          },
+          {
+            "key": "quality",
+            "name": "Data Quality Checks",
+            "description": "<p>Automatic checks that flag broken or late data.</p>",
+            "responsible": "Priya Nair",
+            "start_date": 100,
+            "end_date": 141,
+            "status": "planned",
+            "risk_note": "",
+            "color": null,
+            "workstreams": [
+              {
+                "name": "AI & Data",
+                "row": 0
+              }
+            ],
+            "icons": [],
+            "links": []
+          }
+        ],
+        "milestones": [
+          {
+            "key": "warehouse-live",
+            "name": "Warehouse go-live",
+            "date": 33,
+            "workstream": "AI & Data",
+            "row": 1,
+            "responsible": "Victor Hale",
+            "status": "planned"
+          }
+        ],
+        "dependencies": [
+          {
+            "from": "events",
+            "to": "warehouse"
+          },
+          {
+            "from": "warehouse",
+            "to": {
+              "milestone": "warehouse-live"
+            }
+          },
+          {
+            "from": {
+              "milestone": "warehouse-live"
+            },
+            "to": "usage"
+          }
+        ]
+      }
+    },
+    {
+      "team": {
+        "name": "AI",
+        "tag": "AI",
+        "default_color": "#c2410c"
+      },
+      "roadmap": {
+        "title": "AI Roadmap",
+        "workstreams": [
+          {
+            "name": "Customer Experience"
+          },
+          {
+            "name": "AI & Data"
+          },
+          {
+            "name": "Platform & Reliability"
+          }
+        ],
+        "deliverables": [
+          {
+            "key": "evals",
+            "name": "Model Evaluation Harness",
+            "description": "<p>A repeatable way to score answers before they reach customers.</p>",
+            "responsible": "Alex Morgan",
+            "start_date": -60,
+            "end_date": -19,
+            "status": "done",
+            "risk_note": "",
+            "color": null,
+            "workstreams": [
+              {
+                "name": "AI & Data",
+                "row": 0
+              }
+            ],
+            "icons": [],
+            "links": []
+          },
+          {
+            "key": "assistant-pilot",
+            "name": "Support Assistant Pilot",
+            "description": "<p>An assistant that drafts answers for the support team, built on the event stream.</p>",
+            "responsible": "Noah Becker",
+            "start_date": 46,
+            "end_date": 87,
+            "status": "planned",
+            "risk_note": "",
+            "color": null,
+            "workstreams": [
+              {
+                "name": "AI & Data",
+                "row": 0
+              }
+            ],
+            "icons": [
+              "bulb"
+            ],
+            "links": []
+          },
+          {
+            "key": "assistant-rollout",
+            "name": "Assistant Rollout",
+            "description": "<p>Open the assistant to every support agent.</p>",
+            "responsible": "Alex Morgan",
+            "start_date": 100,
+            "end_date": 155,
+            "status": "planned",
+            "risk_note": "",
+            "color": null,
+            "workstreams": [
+              {
+                "name": "AI & Data",
+                "row": 0
+              }
+            ],
+            "icons": [],
+            "links": []
+          },
+          {
+            "key": "search",
+            "name": "Search Relevance Tuning",
+            "description": "<p>Better ranking for in-app search.</p>",
+            "responsible": "Noah Becker",
+            "start_date": 170,
+            "end_date": 197,
+            "status": "planned",
+            "risk_note": "",
+            "color": null,
+            "workstreams": [
+              {
+                "name": "AI & Data",
+                "row": 0
+              }
+            ],
+            "icons": [],
+            "links": []
+          }
+        ],
+        "milestones": [
+          {
+            "key": "pilot-live",
+            "name": "Assistant pilot go-live",
+            "date": 90,
+            "workstream": "AI & Data",
+            "row": 1,
+            "responsible": "Victor Hale",
+            "status": "in_progress"
+          }
+        ],
+        "dependencies": [
+          {
+            "from": {
+              "external": {
+                "team": "Data Engineering",
+                "name": "Warehouse Cutover"
+              }
+            },
+            "to": "assistant-pilot"
+          },
+          {
+            "from": "assistant-pilot",
+            "to": {
+              "milestone": "pilot-live"
+            }
+          },
+          {
+            "from": {
+              "milestone": "pilot-live"
+            },
+            "to": "assistant-rollout"
+          }
+        ]
+      }
+    },
+    {
+      "team": {
+        "name": "Infrastructure",
+        "tag": "INF",
+        "default_color": "#3b5bdb"
+      },
+      "roadmap": {
+        "title": "Infrastructure Roadmap",
+        "workstreams": [
+          {
+            "name": "Customer Experience"
+          },
+          {
+            "name": "AI & Data"
+          },
+          {
+            "name": "Platform & Reliability"
+          }
+        ],
+        "deliverables": [
+          {
+            "key": "cloud",
+            "name": "Cloud Migration",
+            "description": "<p>Move the remaining services to the new hosting platform.</p>",
+            "responsible": "Riley Park",
+            "start_date": -90,
+            "end_date": -35,
+            "status": "done",
+            "risk_note": "",
+            "color": null,
+            "workstreams": [
+              {
+                "name": "Platform & Reliability",
+                "row": 0
+              }
+            ],
+            "icons": [
+              "shield"
+            ],
+            "links": []
+          },
+          {
+            "key": "observability",
+            "name": "Observability Upgrade",
+            "description": "<p>Dashboards and alerts for every service, so incidents are found by us, not by customers.</p>",
+            "responsible": "Hannah Kim",
+            "start_date": -20,
+            "end_date": 21,
+            "status": "in_progress",
+            "risk_note": "",
+            "color": null,
+            "workstreams": [
+              {
+                "name": "Platform & Reliability",
+                "row": 0
+              }
+            ],
+            "icons": [],
+            "links": []
+          },
+          {
+            "key": "dr",
+            "name": "Disaster Recovery Drills",
+            "description": "<p>Practise restoring from backups.</p>",
+            "responsible": "Riley Park",
+            "start_date": 60,
+            "end_date": 73,
+            "status": "planned",
+            "risk_note": "",
+            "color": null,
+            "workstreams": [
+              {
+                "name": "Platform & Reliability",
+                "row": 0
+              }
+            ],
+            "icons": [],
+            "links": []
+          },
+          {
+            "key": "deploys",
+            "name": "Zero-Downtime Deploys",
+            "description": "<p>Release without taking the product offline.</p>",
+            "responsible": "Hannah Kim",
+            "start_date": 200,
+            "end_date": 255,
+            "status": "planned",
+            "risk_note": "",
+            "color": null,
+            "workstreams": [
+              {
+                "name": "Platform & Reliability",
+                "row": 0
+              }
+            ],
+            "icons": [],
+            "links": []
+          }
+        ],
+        "milestones": [
+          {
+            "key": "soc2",
+            "name": "SOC 2 audit",
+            "date": 262,
+            "workstream": "Platform & Reliability",
+            "row": 0,
+            "responsible": "Victor Hale",
+            "status": "planned"
+          }
+        ],
+        "dependencies": [
+          {
+            "from": "cloud",
+            "to": "observability"
+          },
+          {
+            "from": "observability",
+            "to": "dr"
+          },
+          {
+            "from": "deploys",
+            "to": {
+              "milestone": "soc2"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

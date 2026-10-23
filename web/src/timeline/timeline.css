@@ -1,0 +1,132 @@
+/* The timeline, ported from wireframes/styles.css. Positions are inline (from axis.ts/geometry.ts);
+   this file only styles. Uses the theme tokens from index.css, so both themes work. */
+
+/* overflow: clip (not hidden) rounds the corners without becoming a scroll container, so the header
+   can stay pinned to the page while it scrolls (REQ_FE_070) */
+.tl { flex: 1; min-width: 0; position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-md); overflow: clip; }
+.tl-head { position: sticky; top: 0; z-index: 8; background: var(--surface); }
+.tl-gutter-w { width: 176px; flex: none; }
+.tl-topscroll-row { display: flex; }
+.tl-topscroll { flex: 1; min-width: 0; overflow-x: auto; overflow-y: hidden; height: 14px; }
+.tl-headrow { display: flex; height: 56px; }
+.corner { display: flex; align-items: flex-end; padding: 0 14px 8px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border-strong); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--text-3); font-weight: 600; }
+.tl-hscroll { flex: 1; min-width: 0; overflow: hidden; }
+.tl-header { position: relative; height: 56px; }
+.tl-bodyrow { display: flex; }
+.tl-gutter { position: relative; border-right: 1px solid var(--border); background: var(--surface); }
+.tl-scroll { flex: 1; min-width: 0; overflow-x: auto; overflow-y: hidden; }
+.tl-inner { position: relative; }
+
+.hm, .hw { position: absolute; display: flex; align-items: center; border-left: 1px solid var(--border); white-space: nowrap; overflow: hidden; }
+.hm { top: 0; height: 28px; padding: 0 8px; font-size: 12px; font-weight: 650; color: var(--text); border-bottom: 1px solid var(--border); }
+.hm small { font-weight: 500; color: var(--text-3); margin-left: 6px; }
+.hm.q { border-left-color: var(--border-strong); }
+.qchip { font-size: 10px; font-weight: 700; letter-spacing: .04em; padding: 1px 5px; margin-right: 6px; border-radius: 5px; background: var(--accent-soft); color: var(--accent); }
+.hw { top: 28px; height: 28px; justify-content: center; padding: 0 2px; font-size: 10.5px; letter-spacing: -.01em; color: var(--text-2); font-variant-numeric: tabular-nums; border-bottom: 1px solid var(--border-strong); }
+.hw:hover { background: var(--accent-soft); }
+.hw.cur { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.hw .wstart { display: none; }
+.tl[data-wk="start"] .hw .wf { display: none; }
+.tl[data-wk="start"] .hw .wstart { display: inline; }
+.tl[data-wk="none"] .hw .wf, .tl[data-wk="none"] .hw .wstart { display: none; }
+
+.ws-label { position: absolute; left: 0; right: 0; padding: 12px 14px; border-bottom: 1px solid var(--border); overflow: hidden; }
+.ws-label .name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ws-label .count { color: var(--text-3); font-size: 12px; }
+.band { position: absolute; left: 0; border-bottom: 1px solid var(--border); }
+.gl { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1px solid var(--grid); }
+.past { position: absolute; left: 0; top: 0; bottom: 0; background: color-mix(in srgb, var(--surface-2) 60%, transparent); z-index: 1; pointer-events: none; }
+.today { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px solid var(--accent); opacity: .55; z-index: 1; pointer-events: none; }
+.today-flag { position: absolute; top: 5px; transform: translateX(-50%); background: var(--accent); color: var(--accent-text); font-size: 10.5px; font-weight: 700; padding: 1px 6px; border-radius: 5px; z-index: 3; pointer-events: none; }
+.wkhl { position: absolute; top: 0; bottom: 0; background: color-mix(in srgb, var(--accent) 9%, transparent); z-index: 1; pointer-events: none; }
+
+/* deliverables */
+.deliverable { position: absolute; height: 32px; border-radius: 9px; display: flex; align-items: center; gap: 6px; padding: 0 12px 0 10px; font-size: 12.5px; font-weight: 600; box-shadow: 0 1px 2px rgba(16, 24, 40, .16); border: 1.5px solid rgba(0, 0, 0, .16); background: var(--c); color: var(--fg); cursor: pointer; transition: box-shadow .15s; z-index: 2; user-select: none; touch-action: none; }
+.deliverable.snug { padding: 0; }
+.deliverable.tiny .st, .deliverable.tiny .name, .deliverable.tiny .icons, .deliverable.tiny .risk-strip { display: none; }
+.deliverable:hover { box-shadow: 0 3px 10px rgba(16, 24, 40, .22); z-index: 4; }
+.deliverable .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+/* icons shrink and clip inside the bar like the name, so they can never spill onto a neighbour */
+.deliverable .icons { display: inline-flex; gap: 3px; margin-left: auto; opacity: .92; min-width: 0; overflow: hidden; }
+.deliverable .icons .ic { display: inline-flex; flex: none; }
+.deliverable.dup .icons { opacity: .75; }
+.deliverable.dup { background: color-mix(in srgb, var(--c) 20%, var(--surface)); border: 1.5px dashed var(--c); color: var(--text); box-shadow: none; }
+.deliverable.selected { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent), var(--shadow-md); z-index: 5; }
+.deliverable.dragging { cursor: grabbing; transition: none; z-index: 6; }
+.deliverable .more { display: none; position: absolute; right: 10px; top: -11px; width: 22px; height: 22px; padding: 0; border-radius: 50%; background: var(--surface); color: var(--text); border: 1px solid var(--border-strong); box-shadow: var(--shadow-md); place-items: center; cursor: pointer; }
+.deliverable:hover .more, .deliverable.selected .more { display: grid; }
+.deliverable .rz { position: absolute; top: 0; bottom: 0; width: 6px; cursor: ew-resize; }
+.deliverable .rz.l { left: -1px; }
+.deliverable .rz.r { right: -1px; }
+.deliverable:hover .rz::after { content: ""; position: absolute; top: 9px; bottom: 9px; left: 2px; width: 2px; border-radius: 2px; background: currentColor; opacity: .55; }
+
+/* status badge on the top-left corner, readable on any bar color; at risk adds a hazard strip (REQ_FE_040) */
+.st { position: absolute; left: -7px; top: -7px; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); border: 1.5px solid var(--border-strong); color: var(--text-2); z-index: 6; box-shadow: var(--shadow-sm); }
+.st.st-planned { border-style: dashed; border-color: var(--text-3); color: var(--text-3); }
+.st.st-in_progress { background: var(--accent); border-color: var(--surface); color: var(--accent-text); }
+.st.st-done { background: var(--ok); border-color: var(--surface); color: #fff; }
+:root[data-theme="dark"] .st.st-done { color: #0b2a1a; }
+.st.st-at_risk { width: 21px; height: 21px; left: -8px; top: -8px; background: #d92d3a; border: 2px solid #fff; color: #fff; }
+.risk-strip { position: absolute; left: 10px; right: 10px; bottom: 2px; height: 3px; border-radius: 2px; background: repeating-linear-gradient(-45deg, #d92d3a 0 4px, #fff 4px 8px); pointer-events: none; }
+
+/* milestones: the diamond, which shows the status itself (MilestoneMarker.tsx, REQ_FE_040); the box is the diamond's
+   (width and height set inline from geometry.ts), the name hangs centred under it and the short date to its right, both
+   out of the flow and kept to the free stretch of the row by geometry.ts (REQ_FE_010) */
+.ms { position: absolute; z-index: 4; /* above the arrows (svg.deps, 3): their 12px hit stroke would otherwise cover the marker, its label and its dots */ cursor: pointer; border-radius: 4px; user-select: none; touch-action: none; }
+.ms.dragging { cursor: grabbing; z-index: 6; }
+.ms .mk { position: absolute; inset: 0; }
+.ms .mk svg { display: block; overflow: visible; } /* the at-risk outline reaches 6px outside the box */
+.ms .mk .ok-glyph { stroke: #fff; } /* the done check, as on the deliverable badge (.st.st-done) */
+:root[data-theme="dark"] .ms .mk .ok-glyph { stroke: #0b2a1a; }
+.ms .lbl { position: absolute; top: calc(100% + var(--lg, 2px)); left: 50%; transform: translateX(-50%); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11.5px; line-height: 13px; font-weight: 600; color: var(--text); text-align: center; }
+.ms .dt { position: absolute; left: calc(100% + var(--dg, 6px)); top: 50%; transform: translateY(-50%); white-space: nowrap; max-width: 40px; line-height: 1.15; text-align: left; overflow: hidden; font-size: 11.5px; font-weight: 500; color: var(--text-3); }
+.ms.selected { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.drop-slot { position: absolute; left: 0; right: 0; height: 38px; border: 2px dashed var(--accent); border-radius: 9px; background: color-mix(in srgb, var(--accent) 10%, transparent); z-index: 1; pointer-events: none; }
+.drop-slot.bad { border-color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); }
+
+.wk-tip { position: fixed; z-index: 80; transform: translateX(-50%); pointer-events: none; background: var(--tooltip-bg); color: var(--tooltip-fg); padding: 7px 11px; border-radius: 8px; font-size: 12.5px; line-height: 1.35; box-shadow: var(--shadow-md); white-space: nowrap; }
+.wk-tip small { display: block; opacity: .7; font-size: 11.5px; }
+.tl-notice { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 9; background: var(--tooltip-bg); color: var(--tooltip-fg); padding: 8px 14px; border-radius: 8px; font-size: 13px; box-shadow: var(--shadow-md); }
+
+/* dependencies (Phase 5): faint arrows that stand out on hover/selection, limit lines, badges, connector dots */
+svg.deps { position: absolute; left: 0; top: 0; z-index: 3; pointer-events: none; overflow: visible; }
+.dep-line { fill: none; stroke: var(--text-3); stroke-width: 1.5; opacity: .4; }
+.dep.hl .dep-line { stroke: var(--accent); stroke-width: 2.25; opacity: 1; }
+.dep-hit { fill: none; stroke: transparent; stroke-width: 12; pointer-events: stroke; cursor: pointer; }
+.dep .mark { fill: var(--text-3); opacity: .5; }
+.mark-hl { fill: var(--accent); }
+.dep-x { pointer-events: all; cursor: pointer; }
+/* meeting aids on a trace (REQ_DEP_036-038): tight links amber and dashed with their days, gap flags, highlight fading */
+.dep.tight .dep-line { stroke: #d97706; stroke-width: 2.2; stroke-dasharray: 6 4; opacity: 1; }
+.mark-tight { fill: #d97706; }
+.dep-slack { font-size: 10.5px; font-weight: 700; fill: #b45309; paint-order: stroke; stroke: var(--surface); stroke-width: 3px; }
+:root[data-theme="dark"] .dep-slack { fill: #ffc46b; }
+.faded { opacity: .18; }
+.gap-flags { position: absolute; right: 4px; top: -7px; display: flex; gap: 2px; z-index: 6; pointer-events: auto; } /* never past the item's own left or right edge (REQ_FE_010) */
+.ms .gap-flags { right: 0; top: -12px; }
+.gap-flag { width: 15px; height: 15px; border-radius: 50%; display: grid; place-items: center; background: #fff7e0; color: #8a4b00; border: 1.5px solid #d97706; box-shadow: var(--shadow-sm); }
+:root[data-theme="dark"] .gap-flag { background: #3a2a0c; color: #ffc46b; }
+.dep-x circle { fill: var(--surface); stroke: var(--accent); stroke-width: 1.5; }
+.dep-x path { fill: none; stroke: var(--accent); stroke-width: 1.75; stroke-linecap: round; }
+.dep-rubber { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 5 4; }
+.dep-limit { position: absolute; width: 0; border-left: 2px dashed var(--danger); z-index: 6; pointer-events: none; }
+.dep-badge { position: absolute; width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); color: var(--accent); border: 1.5px solid var(--accent); z-index: 7; box-shadow: var(--shadow-sm); cursor: default; }
+/* connector dots sit 14px inside each edge (centre), clear of the 6px resize zone (REQ_DEP_016/017) */
+.deliverable .cdot { display: none; position: absolute; top: 50%; width: 10px; height: 10px; margin-top: -5px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent); cursor: crosshair; z-index: 7; }
+.deliverable .cdot.l { left: 9px; }
+.deliverable .cdot.r { right: 9px; }
+.deliverable:hover .cdot, .deliverable:focus-within .cdot { display: block; } /* focus-within: reachable by keyboard (REQ_DEP_018) */
+.deliverable.dragging .cdot, .tl.connecting .cdot { display: none; }
+.tl.connecting .deliverable, .tl.connecting .ms { cursor: crosshair; }
+.tl.connecting .deliverable:hover { box-shadow: 0 0 0 2px var(--accent); }
+.tl.connecting .ms:hover { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* a milestone marker's dots are centred on the diamond's left and right tips (--dia is the diamond's width) (REQ_DEP_027) */
+.ms .cdot { display: none; position: absolute; top: 50%; width: 10px; height: 10px; margin-top: -5px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent); cursor: crosshair; z-index: 7; }
+.ms .cdot.l { left: -5px; }
+.ms .cdot.r { left: calc(var(--dia) - 5px); }
+.ms:hover .cdot, .ms:focus-within .cdot { display: block; }
+.ms.dragging .cdot { display: none; }
+
+/* company views (Phase 7). The team tag sits at a bar's left edge; the name shrinks before it does (REQ_FE_054). */
+.deliverable .team-tag { flex: none; overflow: hidden; padding: 0 4px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: .04em; line-height: 16px; text-transform: uppercase; background: color-mix(in srgb, var(--fg) 18%, transparent); color: var(--fg); }

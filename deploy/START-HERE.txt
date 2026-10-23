@@ -1,0 +1,29 @@
+Overlens — start here
+=====================
+
+Overlens is one program. Nothing else needs to be installed.
+
+1. Unpack this archive into a folder of its own. Overlens keeps everything it writes (the database,
+   logs and daily backups) in the overlens-data folder next to the program. Its settings are in
+   roadmap.conf; every setting is explained there.
+
+2. Start the program:
+   - Windows: double-click roadmap.exe.
+     Windows may say "Windows protected your PC" because the program is not signed:
+     click "More info", then "Run anyway".
+     If Windows Firewall asks, you may cancel: Overlens still works on this computer.
+     Allow it only if other computers on your network should reach it.
+   - macOS: open Terminal in this folder and run  ./roadmap
+     If macOS says the developer cannot be verified, open System Settings > Privacy & Security,
+     click "Open Anyway", and run ./roadmap again.
+   - Linux: open a terminal in this folder and run  ./roadmap
+
+3. When it has started, the window ends with a box that says where to open it:
+   http://localhost:8080 . Open that in your browser and log in as  admin  with the password  admin .
+   Change the password right away (account menu).
+
+4. Keep the window open while you use Overlens; closing it (or pressing Ctrl+C) stops the program.
+   Your data stays in overlens-data for the next start.
+
+Running Overlens as a service, in Docker, or on a server for your whole team is described in
+docs/DEPLOY.md of the source repository.

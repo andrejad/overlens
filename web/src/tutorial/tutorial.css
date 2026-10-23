@@ -1,0 +1,36 @@
+/* REQ_FE_128: the tour card uses the app's own colour tokens so it reads in both themes (WCAG AA: --text on --surface). */
+.driver-popover.erm-tour {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-lg);
+  border-radius: 10px;
+  max-width: 340px;
+}
+.driver-popover.erm-tour .driver-popover-title { color: var(--text); font-size: 16px; font-weight: 600; }
+.driver-popover.erm-tour .driver-popover-description { color: var(--text-2); font-size: 14px; line-height: 1.45; }
+.driver-popover.erm-tour .driver-popover-progress-text { color: var(--text-2); font-size: 13px; }
+.driver-popover.erm-tour .driver-popover-footer button {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  text-shadow: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 13px;
+}
+.driver-popover.erm-tour .driver-popover-next-btn { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+.driver-popover.erm-tour .driver-popover-footer button:disabled { opacity: .5; }
+/* "Skip" is driver.js's close button, shown as text in the card's top corner */
+.driver-popover.erm-tour .driver-popover-close-btn {
+  width: auto; height: auto; padding: 2px 8px; font-size: 13px; color: var(--text-2); background: transparent; border: 0;
+  position: absolute; top: 8px; right: 8px; text-decoration: underline;
+}
+.driver-popover.erm-tour .driver-popover-title { padding-right: 48px; }
+.driver-popover.erm-tour .driver-popover-arrow-side-bottom.driver-popover-arrow { border-bottom-color: var(--surface); }
+.driver-popover.erm-tour .driver-popover-arrow-side-top.driver-popover-arrow { border-top-color: var(--surface); }
+.driver-popover.erm-tour .driver-popover-arrow-side-left.driver-popover-arrow { border-left-color: var(--surface); }
+.driver-popover.erm-tour .driver-popover-arrow-side-right.driver-popover-arrow { border-right-color: var(--surface); }
+
+/* REQ_FE_131: the connector-dots step shows the dots on one bar without hovering it (the tour adds the class). */
+.deliverable.tour-dots .cdot { display: block; }

@@ -1,0 +1,59 @@
+# Overlens configuration. Copy to roadmap.conf next to the program (or pass -config) and edit.
+# Relative paths below (db_path, log_dir, backup_dir) are relative to this file's folder.
+# One `key: value` per line; lines starting with # are comments.
+# Any key can also be overridden by an environment variable: ROADMAP_ + the key in capitals,
+# e.g. ROADMAP_PORT=9000. Changes need a restart.
+
+# --- Required (no defaults; the app refuses to start without them) ---
+# The first admin, created only when there are no users yet. Choose both; there is no default password.
+# The password should satisfy the 8 to 128 character rule that applies to every other password (a shorter
+# one is still accepted for now, but the server logs a warning at startup); change it after the first login.
+bootstrap_admin_user:
+bootstrap_admin_password:
+
+# --- Optional (defaults shown) ---
+# HTTP port.
+port: 8080
+
+# SQLite database file. Its folder is created if missing.
+db_path: ./data/roadmap-database.db
+
+# Folder for app.log (renamed to YYYY-MM-DD-app.log at midnight).
+log_dir: ./logs
+
+# DEBUG, INFO, WARN or ERROR.
+log_level: INFO
+
+# Audit rows older than this many days are removed once a day, right after that day's backup succeeded
+# (or at backup time when backups are off; a failed backup postpones it). 0 keeps them forever.
+audit_retention_days: 365
+
+# Daily database backup, made by the program itself (no cron / Task Scheduler needed): on/off, folder
+# (created if missing; must not be the database's folder), time of day (24-hour, server local time) and how
+# many daily backups to keep. Files are roadmap-YYYY-MM-DD.db; after a successful backup the ones beyond
+# the newest backup_keep_days are deleted (only files with exactly that name). If the program was off at
+# backup_time it makes today's backup when it next starts.
+backup_enabled: true
+backup_dir: ./backups
+backup_time: 04:00
+backup_keep_days: 10
+
+# How long a login lasts (extended while you keep using the app).
+session_ttl_days: 365
+
+# production (default) or development. `roadmap -dev-data` (make dev-data) loads the development company
+# only when this is development; use it in your local development config only.
+environment: production
+
+# On the first start of an empty database (no team, no roadmap, never started with sample data before)
+# create the small sample company so the screens are not empty. It happens once, ever. Development configs
+# that use `make dev-data` set this to false.
+sample_data: true
+
+# The session cookie's Secure flag: auto (Secure only when the connection itself is HTTPS; today's behaviour)
+# or true (always Secure, for a proxy such as CapRover that ends HTTPS in front of this plain-HTTP server).
+cookie_secure: auto
+
+# The AI connection (Model Context Protocol) at /mcp: read-only, no login, shows what an anonymous visitor
+# sees. true switches it on; the default false answers 404 there. Env: ROADMAP_MCP_ENABLED.
+# mcp_enabled: false

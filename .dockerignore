@@ -1,0 +1,26 @@
+# Keep the build context small and keep local state out of the image.
+.git
+.claude
+node_modules
+web/node_modules
+web/dist
+web/test-results
+web/playwright-report
+web/.e2e-tmp
+web/*.tsbuildinfo
+wireframes
+requirements
+docs
+data
+logs
+backups
+overlens-data
+roadmap
+roadmap.exe
+roadmap.conf
+*.db
+*.db-wal
+*.db-shm
+*.log
+.dev-servers.pid
+.run

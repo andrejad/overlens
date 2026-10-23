@@ -1,0 +1,21 @@
+{
+  "comment": "REQ_DAT_028: the shared name-trim table. The Go test (internal/store/trim_test.go) and the frontend Vitest run every case through their trim function and require exactly 'out'.",
+  "cases": [
+    {"in": "plain", "out": "plain"},
+    {"in": "  both ends  ", "out": "both ends"},
+    {"in": "\t tab and space \t", "out": "tab and space"},
+    {"in": "\n\r\nnewlines\r\n", "out": "newlines"},
+    {"in": "\u00a0no-break space\u00a0", "out": "no-break space"},
+    {"in": "\u0085next line\u0085", "out": "next line"},
+    {"in": "\ufeffbyte-order mark\ufeff", "out": "byte-order mark"},
+    {"in": "\u200bzero-width space\u200b", "out": "zero-width space"},
+    {"in": "\u2028line separator\u2029", "out": "line separator"},
+    {"in": "\u3000ideographic space\u3000", "out": "ideographic space"},
+    {"in": "\u2003em space\u2009thin\u200a", "out": "em space\u2009thin"},
+    {"in": "\u200b\ufeff \u00a0mixed run\u3000 \ufeff\u200b", "out": "mixed run"},
+    {"in": "inner  space\u00a0kept\u200bhere", "out": "inner  space\u00a0kept\u200bhere"},
+    {"in": "\u200c\u200dzero-width joiners are not trimmed\u200d", "out": "\u200c\u200dzero-width joiners are not trimmed\u200d"},
+    {"in": "\u00a0\u200b \t", "out": ""},
+    {"in": "", "out": ""}
+  ]
+}

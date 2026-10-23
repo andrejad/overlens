@@ -1,0 +1,21 @@
+node_modules/
+web/test-results/
+web/playwright-report/
+web/.e2e-tmp/
+# web/dist is `npm run build` output, embedded by internal/webui at `go build` time (REQ_OVR_008).
+# .gitkeep is tracked so the directory always exists for `//go:embed`, even before a frontend build.
+web/dist/*
+!web/dist/.gitkeep
+web/*.tsbuildinfo
+*.db
+*.db-journal
+*.log
+/roadmap.conf
+/roadmap
+/data/
+/logs/
+/backups/
+/overlens-data/
+/dist/
+.dev-servers.pid
+.claude/worktrees/
