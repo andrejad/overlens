@@ -20,9 +20,9 @@ import (
 func Test_REQ_TEST_006_guard_refuses_unsafe_paths(t *testing.T) {
 	e := NewEnv(t)
 	repo, _ := repoRoot()
-	t.Setenv("ROADMAP_DB", filepath.Join(e.Root, "prod.db"))
+	t.Setenv("OVERLENS_DB", filepath.Join(e.Root, "prod.db"))
 	cases := map[string]string{
-		"repo dev db":       filepath.Join(repo, "data", "roadmap-database.db"),
+		"repo dev db":       filepath.Join(repo, "data", "overlens-database.db"),
 		"repo dev db (old)": filepath.Join(repo, "data", "roadmap.db"),
 		"outside temp dir":  filepath.Join(os.TempDir(), "elsewhere.db"),
 		"home":              filepath.Join(os.Getenv("HOME"), "roadmap.db"),

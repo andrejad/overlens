@@ -24,7 +24,7 @@ func Test_REQ_DEPLOY_010_version_flag_is_stamped_by_ldflags(t *testing.T) {
 	t.Run("startup logs version", func(t *testing.T) {
 		restoreLogger(t)
 		dir := t.TempDir()
-		conf := filepath.Join(dir, "roadmap.conf")
+		conf := filepath.Join(dir, "overlens.conf")
 		os.WriteFile(conf, []byte("bootstrap_admin_user: a\nbootstrap_admin_password: b\nport: "+fmt.Sprint(pickFreePort(t))+"\nbackup_enabled: false\n"+
 			fmt.Sprintf("db_path: %s\nlog_dir: %s\nbackup_dir: %s\n", filepath.Join(dir, "d", "r.db"), filepath.Join(dir, "logs"), filepath.Join(dir, "b"))), 0o600)
 		ctx, cancel := context.WithCancel(context.Background())
@@ -38,11 +38,11 @@ func Test_REQ_DEPLOY_010_version_flag_is_stamped_by_ldflags(t *testing.T) {
 	})
 
 	root := testutil.RepoRoot(t)
-	bin := filepath.Join(t.TempDir(), "roadmap-v")
+	bin := filepath.Join(t.TempDir(), "overlens-v")
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()
 	build := exec.CommandContext(ctx, "go", "build", "-ldflags", "-X main.version=1.2.3 -X main.buildTime=2026-10-04T10:00:00Z -X main.commit=abc1234",
-		"-o", bin, "./cmd/roadmap")
+		"-o", bin, "./cmd/overlens")
 	build.Dir = root
 	if out, err := build.CombinedOutput(); err != nil {
 		t.Fatalf("build: %v\n%s", err, out)
@@ -97,7 +97,7 @@ func newDevRig(t *testing.T, conf string) *devRig {
 	devDataScratch = func(string, func(string) string) bool { return false }
 	t.Cleanup(func() { devDataScratch = prev })
 	dir := t.TempDir()
-	r := &devRig{t: t, dir: dir, dbPath: filepath.Join(dir, "data", "dev.db"), conf: filepath.Join(dir, "roadmap.conf"), file: filepath.Join(dir, "company.json")}
+	r := &devRig{t: t, dir: dir, dbPath: filepath.Join(dir, "data", "dev.db"), conf: filepath.Join(dir, "overlens.conf"), file: filepath.Join(dir, "company.json")}
 	body := "bootstrap_admin_user: a\nbootstrap_admin_password: b\nenvironment: development\nsample_data: false\nbackup_enabled: false\n" +
 		fmt.Sprintf("db_path: %s\nlog_dir: %s\nbackup_dir: %s\n", r.dbPath, filepath.Join(dir, "logs"), filepath.Join(dir, "backups")) + conf
 	os.WriteFile(r.conf, []byte(body), 0o600)
@@ -208,7 +208,7 @@ func Test_REQ_DEMO_018_refuses_unless_environment_is_development(t *testing.T) {
 	}
 	// the environment variable overrides the file
 	os.WriteFile(r.conf, []byte(strings.Replace(mustRead(t, r.conf), "sample_data: false", "environment: production\nsample_data: false", 1)), 0o600)
-	if code := r.run(false, "", map[string]string{"ROADMAP_ENVIRONMENT": "development"}); code != 0 {
+	if code := r.run(false, "", map[string]string{"OVERLENS_ENVIRONMENT": "development"}); code != 0 {
 		t.Fatalf("env override: exit %d %s", code, r.stderr.String())
 	}
 

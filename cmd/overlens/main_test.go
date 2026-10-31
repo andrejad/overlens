@@ -39,10 +39,10 @@ func testEnv(extra map[string]string) func(string) string {
 
 func buildBinary(t *testing.T, dir string) string {
 	t.Helper()
-	bin := filepath.Join(dir, "roadmap-test")
+	bin := filepath.Join(dir, "overlens-test")
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()
-	if out, err := exec.CommandContext(ctx, "go", "build", "-o", bin, filepath.Join(testutil.RepoRoot(t), "cmd", "roadmap")).CombinedOutput(); err != nil {
+	if out, err := exec.CommandContext(ctx, "go", "build", "-o", bin, filepath.Join(testutil.RepoRoot(t), "cmd", "overlens")).CombinedOutput(); err != nil {
 		t.Fatalf("build: %v\n%s", err, out)
 	}
 	return bin
@@ -68,7 +68,7 @@ func runChild(t *testing.T, bin, dir string, args ...string) (stderr string, err
 func Test_REQ_TEST_014_missing_bootstrap_admin_user_exits_nonzero(t *testing.T) {
 	dir := t.TempDir()
 	bin := buildBinary(t, dir)
-	conf := filepath.Join(dir, "roadmap.conf")
+	conf := filepath.Join(dir, "overlens.conf")
 	os.WriteFile(conf, []byte("bootstrap_admin_password: pw-not-logged\n"), 0o600)
 
 	stderr, err := runChild(t, bin, dir, "-config", conf)
@@ -91,18 +91,18 @@ func Test_REQ_TEST_014_missing_bootstrap_admin_user_exits_nonzero(t *testing.T) 
 	}
 }
 
-// The parent's ROADMAP_* variables must not reach the app under test, in-process or as a child.
+// The parent's OVERLENS_* variables must not reach the app under test, in-process or as a child.
 func Test_REQ_TEST_005_parent_environment_cannot_reach_tests(t *testing.T) {
 	restoreLogger(t)
 	trap := t.TempDir()
 	for k, v := range map[string]string{
-		"ROADMAP_DB_PATH": filepath.Join(trap, "trap", "real.db"), "ROADMAP_LOG_DIR": filepath.Join(trap, "traplogs"),
-		"ROADMAP_BOOTSTRAP_ADMIN_USER": "trapuser", "ROADMAP_BOOTSTRAP_ADMIN_PASSWORD": "trappw",
+		"OVERLENS_DB_PATH": filepath.Join(trap, "trap", "real.db"), "OVERLENS_LOG_DIR": filepath.Join(trap, "traplogs"),
+		"OVERLENS_BOOTSTRAP_ADMIN_USER": "trapuser", "OVERLENS_BOOTSTRAP_ADMIN_PASSWORD": "trappw",
 	} {
 		t.Setenv(k, v)
 	}
 	dir := t.TempDir()
-	conf := filepath.Join(dir, "roadmap.conf")
+	conf := filepath.Join(dir, "overlens.conf")
 	os.WriteFile(conf, []byte("port: 1\n"), 0o600) // both bootstrap keys missing: must fail
 
 	var errb bytes.Buffer
@@ -125,7 +125,7 @@ func Test_REQ_CFG_005_failure_log_goes_to_configured_log_dir_else_fallback(t *te
 	restoreLogger(t)
 	dir := t.TempDir()
 	logs := filepath.Join(dir, "custom-logs")
-	conf := filepath.Join(dir, "roadmap.conf")
+	conf := filepath.Join(dir, "overlens.conf")
 	os.WriteFile(conf, []byte("log_dir: custom-logs\nport: abc\n"), 0o600)
 	cwd, _ := os.Getwd()
 	var errb bytes.Buffer
@@ -162,7 +162,7 @@ func Test_REQ_CFG_008_console_copy_and_request_id(t *testing.T) {
 	l, _ := net.Listen("tcp", "127.0.0.1:0")
 	port := l.Addr().(*net.TCPAddr).Port
 	l.Close()
-	conf := filepath.Join(dir, "roadmap.conf")
+	conf := filepath.Join(dir, "overlens.conf")
 	os.WriteFile(conf, []byte(fmt.Sprintf("bootstrap_admin_user: a\nbootstrap_admin_password: b\nport: %d\n"+
 		"db_path: %s\nlog_dir: %s\nbackup_dir: %s\n", port, filepath.Join(dir, "data", "r.db"),
 		filepath.Join(dir, "logs"), filepath.Join(dir, "backups"))), 0o600)
@@ -241,7 +241,7 @@ func Test_REQ_API_019_health_and_graceful_shutdown(t *testing.T) {
 	const attempts = 3
 	for attempt := 1; attempt <= attempts; attempt++ {
 		port := pickFreePort(t)
-		conf := filepath.Join(dir, fmt.Sprintf("roadmap-%d.conf", attempt))
+		conf := filepath.Join(dir, fmt.Sprintf("overlens-%d.conf", attempt))
 		logDir = filepath.Join(dir, fmt.Sprintf("logs-%d", attempt))
 		os.WriteFile(conf, []byte(fmt.Sprintf("bootstrap_admin_user: a\nbootstrap_admin_password: b\nport: %d\n"+
 			"db_path: %s\nlog_dir: %s\nbackup_dir: %s\n", port, filepath.Join(dir, fmt.Sprintf("data-%d", attempt), "r.db"),

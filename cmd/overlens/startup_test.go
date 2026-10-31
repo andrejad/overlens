@@ -25,7 +25,7 @@ import (
 
 // healthEnv is the settings a container would pass, for a given port.
 func healthEnv(port int) map[string]string {
-	return map[string]string{"ROADMAP_PORT": strconv.Itoa(port), "ROADMAP_BOOTSTRAP_ADMIN_USER": "a", "ROADMAP_BOOTSTRAP_ADMIN_PASSWORD": "b"}
+	return map[string]string{"OVERLENS_PORT": strconv.Itoa(port), "OVERLENS_BOOTSTRAP_ADMIN_USER": "a", "OVERLENS_BOOTSTRAP_ADMIN_PASSWORD": "b"}
 }
 
 func portOf(t *testing.T, srv *httptest.Server) int {
@@ -40,7 +40,7 @@ func Test_REQ_DEPLOY_009_healthcheck_exit_codes(t *testing.T) {
 		run := func(port int) (string, string, int) {
 			var out, errb bytes.Buffer
 			cmd := exec.Command(bin, "-healthcheck")
-			cmd.Env = []string{"ROADMAP_PORT=" + strconv.Itoa(port), "ROADMAP_BOOTSTRAP_ADMIN_USER=a", "ROADMAP_BOOTSTRAP_ADMIN_PASSWORD=b"}
+			cmd.Env = []string{"OVERLENS_PORT=" + strconv.Itoa(port), "OVERLENS_BOOTSTRAP_ADMIN_USER=a", "OVERLENS_BOOTSTRAP_ADMIN_PASSWORD=b"}
 			cmd.Stdout, cmd.Stderr = &out, &errb
 			err := cmd.Run()
 			code := 0
@@ -109,14 +109,14 @@ func Test_REQ_DEPLOY_009_healthcheck_exit_codes(t *testing.T) {
 
 }
 
-// REQ_DEPLOY_011: the server starts with no config file when the ROADMAP_* variables carry the settings.
+// REQ_DEPLOY_011: the server starts with no config file when the OVERLENS_* variables carry the settings.
 func Test_REQ_DEPLOY_011_server_starts_without_a_config_file(t *testing.T) {
 	restoreLogger(t)
 	dir := t.TempDir()
 	port := pickFreePort(t)
-	env := map[string]string{"ROADMAP_PORT": strconv.Itoa(port), "ROADMAP_BOOTSTRAP_ADMIN_USER": "a", "ROADMAP_BOOTSTRAP_ADMIN_PASSWORD": "b",
-		"ROADMAP_DB_PATH": filepath.Join(dir, "data", "r.db"), "ROADMAP_LOG_DIR": filepath.Join(dir, "logs"),
-		"ROADMAP_BACKUP_DIR": filepath.Join(dir, "backups"), "ROADMAP_BACKUP_ENABLED": "false", "ROADMAP_SAMPLE_DATA": "false"}
+	env := map[string]string{"OVERLENS_PORT": strconv.Itoa(port), "OVERLENS_BOOTSTRAP_ADMIN_USER": "a", "OVERLENS_BOOTSTRAP_ADMIN_PASSWORD": "b",
+		"OVERLENS_DB_PATH": filepath.Join(dir, "data", "r.db"), "OVERLENS_LOG_DIR": filepath.Join(dir, "logs"),
+		"OVERLENS_BACKUP_DIR": filepath.Join(dir, "backups"), "OVERLENS_BACKUP_ENABLED": "false", "OVERLENS_SAMPLE_DATA": "false"}
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan int, 1)
 	go func() { done <- run(ctx, filepath.Join(dir, "absent.conf"), testEnv(env), io.Discard) }()
@@ -130,7 +130,7 @@ func Test_REQ_DEPLOY_011_server_starts_without_a_config_file(t *testing.T) {
 		if err := explicitConfigExists(filepath.Join(t.TempDir(), "nope.conf")); err == nil {
 			t.Error("a mistyped -config path was accepted")
 		}
-		present := filepath.Join(t.TempDir(), "roadmap.conf")
+		present := filepath.Join(t.TempDir(), "overlens.conf")
 		if err := os.WriteFile(present, []byte("port: 8080\n"), 0o600); err != nil {
 			t.Fatal(err)
 		}
@@ -174,7 +174,7 @@ func Test_REQ_DEMO_005_server_starts_when_the_sample_is_broken(t *testing.T) {
 
 	dir := t.TempDir()
 	port := pickFreePort(t)
-	conf := filepath.Join(dir, "roadmap.conf")
+	conf := filepath.Join(dir, "overlens.conf")
 	os.WriteFile(conf, []byte(fmt.Sprintf("bootstrap_admin_user: a\nbootstrap_admin_password: b\nport: %d\nbackup_enabled: false\nsample_data: true\n"+
 		"db_path: %s\nlog_dir: %s\nbackup_dir: %s\n", port, filepath.Join(dir, "data", "r.db"), filepath.Join(dir, "logs"), filepath.Join(dir, "backups"))), 0o600)
 	ctx, cancel := context.WithCancel(context.Background())

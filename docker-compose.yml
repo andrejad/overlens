@@ -3,9 +3,9 @@
 # WHY ABSOLUTE PATHS: Portainer and some Docker setups resolve relative paths against a temporary
 # folder, not against this file, so a relative bind mount would quietly put the database somewhere
 # that disappears. DATA_DIR, BACKUP_DIR and CONFIG_DIR must therefore be absolute host paths such as
-# /srv/roadmap/data. They must exist and be writable by uid 65532 (the container's non-root user):
-#   sudo mkdir -p /srv/roadmap/data /srv/roadmap/backups /srv/roadmap/config
-#   sudo chown 65532:65532 /srv/roadmap/data /srv/roadmap/backups
+# /srv/overlens/data. They must exist and be writable by uid 65532 (the container's non-root user):
+#   sudo mkdir -p /srv/overlens/data /srv/overlens/backups /srv/overlens/config
+#   sudo chown 65532:65532 /srv/overlens/data /srv/overlens/backups
 #
 # WHY A BIND ADDRESS: the app is for the company VPN only. The port is published on the host's VPN
 # interface address (VPN_BIND_ADDRESS, e.g. 10.8.0.5) and there is deliberately no default, so a
@@ -13,7 +13,7 @@
 #
 # Variables (a .env file beside this file, or the Portainer stack's environment section):
 #   VPN_BIND_ADDRESS        required  the host's VPN interface address
-#   DATA_DIR                required  absolute path; holds roadmap-database.db and the logs
+#   DATA_DIR                required  absolute path; holds overlens-database.db and the logs
 #   BACKUP_DIR              required  absolute path; the daily backups (not inside DATA_DIR)
 #   CONFIG_DIR              required  absolute path; holds the secret file admin_password (see below)
 #   BOOTSTRAP_ADMIN_USER    required  username of the first admin
@@ -21,30 +21,30 @@
 #   IMAGE                   optional  image to run, default overlens:latest (built by `docker build`, see docs/DEPLOY.md)
 #
 # The first admin's password is read from the file ${CONFIG_DIR}/admin_password (one line, no
-# quotes) through ROADMAP_BOOTSTRAP_ADMIN_PASSWORD_FILE, so it never appears in this file or in the
+# quotes) through OVERLENS_BOOTSTRAP_ADMIN_PASSWORD_FILE, so it never appears in this file or in the
 # Portainer stack's environment.
 #
-# To use a roadmap.conf instead of environment variables, put it in CONFIG_DIR and add
-#   command: ["-config", "/config/roadmap.conf"]
-# to the service, and give the healthcheck the same flag: ["CMD", "/app/roadmap", "-config", "/config/roadmap.conf", "-healthcheck"].
-# The ROADMAP_* variables below still override it.
+# To use a overlens.conf instead of environment variables, put it in CONFIG_DIR and add
+#   command: ["-config", "/config/overlens.conf"]
+# to the service, and give the healthcheck the same flag: ["CMD", "/app/overlens", "-config", "/config/overlens.conf", "-healthcheck"].
+# The OVERLENS_* variables below still override it.
 
 services:
-  roadmap:
+  overlens:
     # `docker compose up -d --build` builds the image from the Dockerfile in this folder; a Portainer
     # stack made from the Git repository does the same. To run a prebuilt image instead, set IMAGE.
     build: .
     image: ${IMAGE:-overlens:latest}
-    container_name: roadmap
+    container_name: overlens
     restart: unless-stopped
     ports:
       - "${VPN_BIND_ADDRESS:?set VPN_BIND_ADDRESS to the host's VPN interface address}:8080:8080"
     environment:
-      ROADMAP_ENVIRONMENT: production
-      ROADMAP_BOOTSTRAP_ADMIN_USER: ${BOOTSTRAP_ADMIN_USER:?set BOOTSTRAP_ADMIN_USER}
-      ROADMAP_BOOTSTRAP_ADMIN_PASSWORD_FILE: /config/admin_password
-      ROADMAP_SAMPLE_DATA: ${SAMPLE_DATA:-true}
-      # ROADMAP_COOKIE_SECURE stays at its default (auto): the VPN setup is plain HTTP, and the
+      OVERLENS_ENVIRONMENT: production
+      OVERLENS_BOOTSTRAP_ADMIN_USER: ${BOOTSTRAP_ADMIN_USER:?set BOOTSTRAP_ADMIN_USER}
+      OVERLENS_BOOTSTRAP_ADMIN_PASSWORD_FILE: /config/admin_password
+      OVERLENS_SAMPLE_DATA: ${SAMPLE_DATA:-true}
+      # OVERLENS_COOKIE_SECURE stays at its default (auto): the VPN setup is plain HTTP, and the
       # cookie only gets Secure when the request itself arrives over TLS.
     volumes:
       - ${DATA_DIR:?set DATA_DIR to an absolute host path}:/data
@@ -55,7 +55,7 @@ services:
     # the check runs the program itself. `-healthcheck` asks http://127.0.0.1:<port>/health inside the
     # container (the same check as the image's HEALTHCHECK) and exits 0 on 200, else 1.
     healthcheck:
-      test: ["CMD", "/app/roadmap", "-healthcheck"]
+      test: ["CMD", "/app/overlens", "-healthcheck"]
       interval: 30s
       timeout: 5s
       retries: 3

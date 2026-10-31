@@ -1,4 +1,4 @@
-// Command roadmap is the Overlens server (REQ_OVR_014: the program keeps its name). Phase 1: config, database, /health.
+// Command overlens is the Overlens server. Phase 1: config, database, /health.
 package main
 
 import (
@@ -47,11 +47,11 @@ var (
 var ensureSample = demo.EnsureSample
 
 func versionLine() string {
-	return fmt.Sprintf("roadmap %s (built %s, commit %s)", version, buildTime, commit)
+	return fmt.Sprintf("overlens %s (built %s, commit %s)", version, buildTime, commit)
 }
 
 func main() {
-	confPath := flag.String("config", "", "path to roadmap.conf (default: beside the binary)")
+	confPath := flag.String("config", "", "path to overlens.conf (default: beside the binary)")
 	showVersion := flag.Bool("version", false, "print the version, build time and commit, then exit")
 	devData := flag.String("dev-data", "", "load this development company file (dev/company.json) into the development database, then exit")
 	reset := flag.Bool("reset", false, "with -dev-data: wipe the database first (asks you to type yes)")
@@ -62,7 +62,7 @@ func main() {
 		return
 	}
 	if *confPath == "" {
-		*confPath = filepath.Join(exeDir(), "roadmap.conf")
+		*confPath = filepath.Join(exeDir(), "overlens.conf")
 	} else if err := explicitConfigExists(*confPath); err != nil {
 		// REQ_DEPLOY_011: only the default file may be missing; a path given with -config that does not exist is a typo
 		fmt.Fprintln(os.Stderr, err)
@@ -80,7 +80,7 @@ func main() {
 	os.Exit(run(ctx, *confPath, os.Getenv, os.Stderr))
 }
 
-// exeDir is the directory of the running binary; roadmap.conf and the fallback log live there.
+// exeDir is the directory of the running binary; overlens.conf and the fallback log live there.
 func exeDir() string {
 	exe, err := os.Executable()
 	if err != nil {
@@ -255,7 +255,7 @@ func failConfig(confPath string, getenv func(string) string, err error, stderr i
 }
 
 // explicitConfigExists refuses a -config path that is not there. config.Load tolerates a missing file so a
-// container can run on ROADMAP_* variables alone, but a path the operator typed must not be ignored silently.
+// container can run on OVERLENS_* variables alone, but a path the operator typed must not be ignored silently.
 func explicitConfigExists(path string) error {
 	if _, err := os.Stat(path); errors.Is(err, fs.ErrNotExist) {
 		return fmt.Errorf("config file %q given with -config does not exist", path)
@@ -269,7 +269,7 @@ func explicitConfigExists(path string) error {
 func startMessage(port int, firstAdmin string) string {
 	lines := []string{"Overlens is running.", "", "Open in your browser:", fmt.Sprintf("    http://localhost:%d", port), ""}
 	if firstAdmin != "" {
-		lines = append(lines, fmt.Sprintf("First start: log in as %q with the password", firstAdmin), "from roadmap.conf, then change it (account menu).", "")
+		lines = append(lines, fmt.Sprintf("First start: log in as %q with the password", firstAdmin), "from overlens.conf, then change it (account menu).", "")
 	}
 	lines = append(lines, "Keep this window open.", "Press Ctrl+C to stop Overlens.")
 	w := 0

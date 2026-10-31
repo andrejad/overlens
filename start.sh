@@ -6,7 +6,7 @@ cd "$(dirname "$0")"
 export PATH="$HOME/.local/go/bin:$HOME/go/bin:$PATH"
 
 PIDFILE=.dev-servers.pid
-BACKEND_PORT=${ROADMAP_PORT:-8080}
+BACKEND_PORT=${OVERLENS_PORT:-8080}
 FRONTEND_PORT=5173
 
 port_busy() { ss -ltn "sport = :$1" | grep -q LISTEN; }
@@ -29,10 +29,10 @@ fi
 # Build the backend binary (instead of `go run`) so the process we signal is the server itself.
 BIN_DIR=$(mktemp -d)
 echo "[start] building backend..."
-go build -o "$BIN_DIR/roadmap" ./cmd/roadmap || { rm -rf "$BIN_DIR"; exit 1; }
+go build -o "$BIN_DIR/overlens" ./cmd/overlens || { rm -rf "$BIN_DIR"; exit 1; }
 
 # LOG_PREFIX is cleared like in `make run`: the test prefix must not reach dev logs.
-(LOG_PREFIX= exec "$BIN_DIR/roadmap" -config "$PWD/roadmap.conf") > >(sed -u 's/^/[backend]  /') 2>&1 &
+(LOG_PREFIX= exec "$BIN_DIR/overlens" -config "$PWD/overlens.conf") > >(sed -u 's/^/[backend]  /') 2>&1 &
 BACKEND_PID=$!
 (cd web && exec node_modules/.bin/vite) > >(sed -u 's/^/[frontend] /') 2>&1 &
 FRONTEND_PID=$!

@@ -21,11 +21,11 @@ Everything after the routes (first start, restoring a backup, upgrading, health 
 
 Each release has ready downloads (REQ_DEPLOY_016): `overlens-<version>-windows-x64.zip`, `-linux-x64` and `-linux-arm64`,
 `-macos-arm64` (Apple Silicon) and `-macos-x64` (Intel) as `.tar.gz`, with a `SHA256SUMS` file to check them. Unpack one
-into a folder of its own and start the program in it (`roadmap.exe` by double-click on Windows, `./roadmap` in a terminal
+into a folder of its own and start the program in it (`overlens.exe` by double-click on Windows, `./overlens` in a terminal
 on macOS and Linux); `START-HERE.txt` in the archive says the same, including the warnings Windows and macOS show for a
 program that is not signed.
 
-The archive carries a ready `roadmap.conf` (`deploy/roadmap.conf` in the repository) with every setting filled in and
+The archive carries a ready `overlens.conf` (`deploy/overlens.conf` in the repository) with every setting filled in and
 explained: admin `admin` with the password `admin`, port 8080, the sample company, the AI connection on, daily backups at
 04:00 kept 10 days, and everything the program writes in `overlens-data/` beside it (`db/`, `logs/`, `backups/`). Change
 the password right after the first login. When the program has started, its window ends with a framed message giving the
@@ -37,8 +37,8 @@ them to the GitHub release.
 
 ## Configuration in one page
 
-The program reads `roadmap.conf` (see `roadmap.conf.example`, every key is explained there). Any key can be set with an
-environment variable instead: `ROADMAP_` plus the key in capitals (`ROADMAP_PORT=9000`); the variable wins over the file.
+The program reads `overlens.conf` (see `overlens.conf.example`, every key is explained there). Any key can be set with an
+environment variable instead: `OVERLENS_` plus the key in capitals (`OVERLENS_PORT=9000`); the variable wins over the file.
 The container is configured only with variables. Changes need a restart.
 
 New keys with the Phase 8 release:
@@ -50,8 +50,8 @@ New keys with the Phase 8 release:
 | `sample_data` | `true` (default), `false` | `true` creates a small sample company once, on the first start of an empty database |
 | `mcp_enabled` | `false` (default), `true` | `true` switches on the read-only AI connection at `/mcp` (see "Connecting AI apps" below). Off, `/mcp` answers `404` |
 
-`ROADMAP_BOOTSTRAP_ADMIN_PASSWORD_FILE` can name a file holding the first admin's password (trailing line breaks are removed; the file must hold nothing else), instead of putting
-the password in `ROADMAP_BOOTSTRAP_ADMIN_PASSWORD`.
+`OVERLENS_BOOTSTRAP_ADMIN_PASSWORD_FILE` can name a file holding the first admin's password (trailing line breaks are removed; the file must hold nothing else), instead of putting
+the password in `OVERLENS_BOOTSTRAP_ADMIN_PASSWORD`.
 
 ## Linux route (systemd)
 
@@ -61,38 +61,38 @@ Needs a Linux server with systemd. `make build-linux` builds the program on any 
 make build-linux
 ```
 
-This writes `dist/roadmap`, the Linux program, with the
-frontend embedded and the version, build time and commit stamped in (see "Versions"). `./dist/roadmap -version` prints them.
+This writes `dist/overlens`, the Linux program, with the
+frontend embedded and the version, build time and commit stamped in (see "Versions"). `./dist/overlens -version` prints them.
 
-Install, as root (or with `sudo`) on the server, with the built `roadmap` and the repository's `deploy/roadmap.service`
+Install, as root (or with `sudo`) on the server, with the built `overlens` and the repository's `deploy/overlens.service`
 copied over:
 
 ```
-useradd --system --home-dir /var/lib/roadmap --shell /usr/sbin/nologin roadmap
-install -d -o roadmap -g roadmap -m 750 /var/lib/roadmap /var/log/roadmap /var/backups/roadmap
-install -d -m 755 /opt/roadmap /etc/roadmap
-install -m 755 dist/roadmap /opt/roadmap/roadmap
-install -m 640 -o root -g roadmap roadmap.conf.example /etc/roadmap/roadmap.conf
-install -m 644 deploy/roadmap.service /etc/systemd/system/roadmap.service
+useradd --system --home-dir /var/lib/overlens --shell /usr/sbin/nologin overlens
+install -d -o overlens -g overlens -m 750 /var/lib/overlens /var/log/overlens /var/backups/overlens
+install -d -m 755 /opt/overlens /etc/overlens
+install -m 755 dist/overlens /opt/overlens/overlens
+install -m 640 -o root -g overlens overlens.conf.example /etc/overlens/overlens.conf
+install -m 644 deploy/overlens.service /etc/systemd/system/overlens.service
 ```
 
-Edit `/etc/roadmap/roadmap.conf`. Use absolute paths, because relative ones resolve against `/etc/roadmap`:
+Edit `/etc/overlens/overlens.conf`. Use absolute paths, because relative ones resolve against `/etc/overlens`:
 
 ```
 bootstrap_admin_user: admin
 bootstrap_admin_password: choose-a-long-password
-db_path: /var/lib/roadmap/roadmap-database.db
-log_dir: /var/log/roadmap
-backup_dir: /var/backups/roadmap
+db_path: /var/lib/overlens/overlens-database.db
+log_dir: /var/log/overlens
+backup_dir: /var/backups/overlens
 ```
 
-The file holds a password, so it is readable only by root and the `roadmap` group (set above by `-m 640`). Then:
+The file holds a password, so it is readable only by root and the `overlens` group (set above by `-m 640`). Then:
 
 ```
 systemctl daemon-reload
-systemctl enable --now roadmap
-systemctl status roadmap
-journalctl -u roadmap -f
+systemctl enable --now overlens
+systemctl status overlens
+journalctl -u overlens -f
 curl http://localhost:8080/health
 ```
 
@@ -101,58 +101,58 @@ the server's firewall, or put the VPN address in front of it with a firewall rul
 
 ## Windows route
 
-`make build-windows` (run on Linux, macOS or WSL) builds `roadmap.exe` with the frontend embedded and the version stamped in.
+`make build-windows` (run on Linux, macOS or WSL) builds `overlens.exe` with the frontend embedded and the version stamped in.
 Copy these to the Windows server:
 
-- `roadmap.exe` into `C:\Program Files\Roadmap\`
-- `roadmap.conf.example` as `C:\ProgramData\Roadmap\roadmap.conf`
-- [NSSM](https://nssm.cc) (`nssm.exe`), because `roadmap.exe` is an ordinary console program and does not speak the Windows
+- `overlens.exe` into `C:\Program Files\Overlens\`
+- `overlens.conf.example` as `C:\ProgramData\Overlens\overlens.conf`
+- [NSSM](https://nssm.cc) (`nssm.exe`), because `overlens.exe` is an ordinary console program and does not speak the Windows
   service protocol. `sc.exe create` on its own would make a service that Windows kills after 30 seconds (error 1053).
   NSSM runs the program as a service, and `sc.exe` then manages that service.
 
-Edit `C:\ProgramData\Roadmap\roadmap.conf` in Notepad with absolute paths (a backslash is fine; so is a forward slash):
+Edit `C:\ProgramData\Overlens\overlens.conf` in Notepad with absolute paths (a backslash is fine; so is a forward slash):
 
 ```
 bootstrap_admin_user: admin
 bootstrap_admin_password: choose-a-long-password
-db_path: C:\ProgramData\Roadmap\data\roadmap-database.db
-log_dir: C:\ProgramData\Roadmap\logs
-backup_dir: D:\RoadmapBackups
+db_path: C:\ProgramData\Overlens\data\overlens-database.db
+log_dir: C:\ProgramData\Overlens\logs
+backup_dir: D:\OverlensBackups
 ```
 
 Run in an Administrator PowerShell. First a service account with no other rights, and the folders it may write:
 
 ```
 $pw = Read-Host -AsSecureString "Password for the service account"
-New-LocalUser -Name svc-roadmap -Password $pw -PasswordNeverExpires -UserMayNotChangePassword
-New-Item -ItemType Directory C:\ProgramData\Roadmap\data, C:\ProgramData\Roadmap\logs, D:\RoadmapBackups -Force
-icacls "C:\ProgramData\Roadmap" /grant "svc-roadmap:(OI)(CI)M" /T
-icacls "D:\RoadmapBackups" /grant "svc-roadmap:(OI)(CI)M"
-icacls "C:\Program Files\Roadmap" /grant "svc-roadmap:(OI)(CI)RX"
+New-LocalUser -Name svc-overlens -Password $pw -PasswordNeverExpires -UserMayNotChangePassword
+New-Item -ItemType Directory C:\ProgramData\Overlens\data, C:\ProgramData\Overlens\logs, D:\OverlensBackups -Force
+icacls "C:\ProgramData\Overlens" /grant "svc-overlens:(OI)(CI)M" /T
+icacls "D:\OverlensBackups" /grant "svc-overlens:(OI)(CI)M"
+icacls "C:\Program Files\Overlens" /grant "svc-overlens:(OI)(CI)RX"
 ```
 
 Install and start the service (the working folder is the program's own folder; `AppParameters` points it to the config):
 
 ```
-nssm install Roadmap "C:\Program Files\Roadmap\roadmap.exe"
-nssm set Roadmap AppDirectory "C:\Program Files\Roadmap"
-nssm set Roadmap AppParameters "-config C:\ProgramData\Roadmap\roadmap.conf"
-nssm set Roadmap ObjectName ".\svc-roadmap" "<the account's password>"
-nssm set Roadmap Start SERVICE_AUTO_START
-nssm set Roadmap AppExit Default Restart
-nssm set Roadmap AppStdout C:\ProgramData\Roadmap\logs\service.out.log
-nssm set Roadmap AppStderr C:\ProgramData\Roadmap\logs\service.err.log
-sc.exe description Roadmap "Overlens"
-sc.exe start Roadmap
-sc.exe query Roadmap
+nssm install Overlens "C:\Program Files\Overlens\overlens.exe"
+nssm set Overlens AppDirectory "C:\Program Files\Overlens"
+nssm set Overlens AppParameters "-config C:\ProgramData\Overlens\overlens.conf"
+nssm set Overlens ObjectName ".\svc-overlens" "<the account's password>"
+nssm set Overlens Start SERVICE_AUTO_START
+nssm set Overlens AppExit Default Restart
+nssm set Overlens AppStdout C:\ProgramData\Overlens\logs\service.out.log
+nssm set Overlens AppStderr C:\ProgramData\Overlens\logs\service.err.log
+sc.exe description Overlens "Overlens"
+sc.exe start Overlens
+sc.exe query Overlens
 ```
 
 NSSM stops the program with Ctrl+C, which it handles as a graceful shutdown. If the service will not start with error 1069
 (logon failure), open Local Security Policy, Local Policies, User Rights Assignment, "Log on as a service" and add
-`svc-roadmap`. Check `http://localhost:8080/health` in a browser. Allow the port in Windows Firewall only for the VPN
+`svc-overlens`. Check `http://localhost:8080/health` in a browser. Allow the port in Windows Firewall only for the VPN
 network profile or address range.
 
-To remove it: `sc.exe stop Roadmap` then `nssm remove Roadmap confirm`.
+To remove it: `sc.exe stop Overlens` then `nssm remove Overlens confirm`.
 
 ## Docker route (Portainer and Docker Compose)
 
@@ -168,16 +168,16 @@ Use absolute paths. The compose file explains why at its top: a relative path ma
 Portainer and the database would be lost on the next deploy.
 
 ```
-sudo mkdir -p /srv/roadmap/data /srv/roadmap/backups /srv/roadmap/config
-sudo chown 65532:65532 /srv/roadmap/data /srv/roadmap/backups
+sudo mkdir -p /srv/overlens/data /srv/overlens/backups /srv/overlens/config
+sudo chown 65532:65532 /srv/overlens/data /srv/overlens/backups
 ```
 
 Put the first admin's password in a file, one line, no quotes, readable by the container user (it is mounted read-only):
 
 ```
-printf '%s\n' 'choose-a-long-password' | sudo tee /srv/roadmap/config/admin_password > /dev/null
-sudo chown 65532:65532 /srv/roadmap/config/admin_password
-sudo chmod 400 /srv/roadmap/config/admin_password
+printf '%s\n' 'choose-a-long-password' | sudo tee /srv/overlens/config/admin_password > /dev/null
+sudo chown 65532:65532 /srv/overlens/config/admin_password
+sudo chmod 400 /srv/overlens/config/admin_password
 ```
 
 The whole file is the password, minus trailing line breaks; if the first login fails, check that the file holds nothing else.
@@ -188,9 +188,9 @@ Create a file `.env` beside `docker-compose.yml`:
 
 ```
 VPN_BIND_ADDRESS=10.8.0.5
-DATA_DIR=/srv/roadmap/data
-BACKUP_DIR=/srv/roadmap/backups
-CONFIG_DIR=/srv/roadmap/config
+DATA_DIR=/srv/overlens/data
+BACKUP_DIR=/srv/overlens/backups
+CONFIG_DIR=/srv/overlens/config
 BOOTSTRAP_ADMIN_USER=admin
 ```
 
@@ -200,7 +200,7 @@ it `docker compose` stops with an error, so the app is never published on all in
 ```
 docker compose config        # prints the resolved file; check the ports and paths
 docker compose up -d --build
-docker compose logs -f roadmap
+docker compose logs -f overlens
 ```
 
 Open `http://<VPN_BIND_ADDRESS>:8080`.
@@ -218,15 +218,15 @@ Open `http://<VPN_BIND_ADDRESS>:8080`.
 `docker build -t overlens --build-arg VERSION=$(make -s version) --build-arg COMMIT=$(git rev-parse --short HEAD) --build-arg BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) .`
 stamps the version, commit and build time into the program. Without `--build-arg VERSION` (as on CapRover, which builds
 from the files alone) the `VERSION` file in the repository is used. They show in the first lines of the log
-(`docker compose logs roadmap`), in `GET /health` (the version) and on the admin screen.
+(`docker compose logs overlens`), in `GET /health` (the version) and on the admin screen.
 
 ### Where things are
 
 | In the container | On the host | Holds |
 |---|---|---|
-| `/data` | `DATA_DIR` | `roadmap-database.db` (plus `roadmap-database.db-wal` and `roadmap-database.db-shm` while running) and `logs/` |
-| `/backups` | `BACKUP_DIR` | `roadmap-YYYY-MM-DD.db`, one per day, the newest 10 kept |
-| `/config` (read-only) | `CONFIG_DIR` | `admin_password`, optionally `roadmap.conf` |
+| `/data` | `DATA_DIR` | `overlens-database.db` (plus `overlens-database.db-wal` and `overlens-database.db-shm` while running) and `logs/` |
+| `/backups` | `BACKUP_DIR` | `overlens-YYYY-MM-DD.db`, one per day, the newest 10 kept |
+| `/config` (read-only) | `CONFIG_DIR` | `admin_password`, optionally `overlens.conf` |
 
 Keep `BACKUP_DIR` on a different disk from `DATA_DIR` if you can; a backup next to the database does not survive a dead disk.
 
@@ -234,24 +234,24 @@ Keep `BACKUP_DIR` on a different disk from `DATA_DIR` if you can; a backup next 
 
 Runs the same Dockerfile: the repository's `captain-definition` tells CapRover to build with `./Dockerfile`.
 
-In the CapRover dashboard, create an app (for example `roadmap`), tick "Has persistent data", then:
+In the CapRover dashboard, create an app (for example `overlens`), tick "Has persistent data", then:
 
 1. **HTTP Settings.** Set "Container HTTP Port" to `8080` (CapRover's default is 80). Enable HTTPS and tick "Force HTTPS by
    redirecting all HTTP traffic to HTTPS" after you have attached the domain (Enable HTTPS on the app's domain; CapRover gets
    the certificate from Let's Encrypt).
-2. **App Configs, Persistent Directories.** Add `/data` (label `roadmap-data`) so the database survives deploys. Add
-   `/backups` (label `roadmap-backups`) as well. The sample, logs and database live in `/data`.
+2. **App Configs, Persistent Directories.** Add `/data` (label `overlens-data`) so the database survives deploys. Add
+   `/backups` (label `overlens-backups`) as well. The sample, logs and database live in `/data`.
 3. **App Configs, Environment Variables:**
 
    ```
-   ROADMAP_BOOTSTRAP_ADMIN_USER=owner
-   ROADMAP_BOOTSTRAP_ADMIN_PASSWORD=<a long random password>
-   ROADMAP_COOKIE_SECURE=true
-   ROADMAP_SAMPLE_DATA=false
+   OVERLENS_BOOTSTRAP_ADMIN_USER=owner
+   OVERLENS_BOOTSTRAP_ADMIN_PASSWORD=<a long random password>
+   OVERLENS_COOKIE_SECURE=true
+   OVERLENS_SAMPLE_DATA=false
    ```
 
-   `ROADMAP_COOKIE_SECURE=true` is needed because CapRover ends HTTPS at its proxy, so the app sees plain HTTP and would
-   otherwise send the session cookie without `Secure`. `ROADMAP_SAMPLE_DATA=false` starts with an empty roadmap; leave it out
+   `OVERLENS_COOKIE_SECURE=true` is needed because CapRover ends HTTPS at its proxy, so the app sees plain HTTP and would
+   otherwise send the session cookie without `Secure`. `OVERLENS_SAMPLE_DATA=false` starts with an empty roadmap; leave it out
    (the default is `true`) to get the small sample company on the first start.
 4. **Deployment.** From a checkout of the repository, with the CapRover CLI (`npm install -g caprover`):
 
@@ -275,27 +275,27 @@ Uses the same image as the Docker route: build it as in "Version stamp" and push
 The app keeps its data in one SQLite file, so **run exactly one replica** with the `Recreate` strategy: two pods on one
 database would corrupt it, and a rolling update briefly runs two. There is no scaling out; the one pod is the server.
 
-Save this as `roadmap.yaml`, replace the image and the password, and run `kubectl apply -f roadmap.yaml`:
+Save this as `overlens.yaml`, replace the image and the password, and run `kubectl apply -f overlens.yaml`:
 
 ```yaml
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: roadmap
+  name: overlens
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: roadmap-admin
-  namespace: roadmap
+  name: overlens-admin
+  namespace: overlens
 stringData:
   password: choose-a-long-password
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: roadmap-data
-  namespace: roadmap
+  name: overlens-data
+  namespace: overlens
 spec:
   accessModes: [ReadWriteOnce]
   resources:
@@ -305,8 +305,8 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: roadmap-backups
-  namespace: roadmap
+  name: overlens-backups
+  namespace: overlens
 spec:
   accessModes: [ReadWriteOnce]
   resources:
@@ -316,36 +316,36 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: roadmap
-  namespace: roadmap
+  name: overlens
+  namespace: overlens
 spec:
   replicas: 1
   strategy:
     type: Recreate
   selector:
     matchLabels:
-      app: roadmap
+      app: overlens
   template:
     metadata:
       labels:
-        app: roadmap
+        app: overlens
     spec:
       securityContext:
         runAsUser: 65532
         runAsGroup: 65532
         fsGroup: 65532
       containers:
-        - name: roadmap
+        - name: overlens
           image: registry.example.com/overlens:1.0.0
           ports:
             - containerPort: 8080
           env:
-            - name: ROADMAP_BOOTSTRAP_ADMIN_USER
+            - name: OVERLENS_BOOTSTRAP_ADMIN_USER
               value: admin
-            - name: ROADMAP_BOOTSTRAP_ADMIN_PASSWORD
+            - name: OVERLENS_BOOTSTRAP_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: roadmap-admin
+                  name: overlens-admin
                   key: password
           volumeMounts:
             - name: data
@@ -364,34 +364,34 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: roadmap-data
+            claimName: overlens-data
         - name: backups
           persistentVolumeClaim:
-            claimName: roadmap-backups
+            claimName: overlens-backups
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: roadmap
-  namespace: roadmap
+  name: overlens
+  namespace: overlens
 spec:
   selector:
-    app: roadmap
+    app: overlens
   ports:
     - port: 80
       targetPort: 8080
 ```
 
-Check it with `kubectl -n roadmap rollout status deploy/roadmap` and `kubectl -n roadmap logs deploy/roadmap`. To try it
-from your machine: `kubectl -n roadmap port-forward svc/roadmap 8080:80`, then open `http://localhost:8080`.
+Check it with `kubectl -n overlens rollout status deploy/overlens` and `kubectl -n overlens logs deploy/overlens`. To try it
+from your machine: `kubectl -n overlens port-forward svc/overlens 8080:80`, then open `http://localhost:8080`.
 
 - **Keep it on the VPN.** The Service is `ClusterIP`, so it is reachable only inside the cluster. Expose it to the VPN with
   an internal Ingress or an internal load balancer, never a public one.
-- **TLS at the ingress.** If the ingress ends HTTPS, add the variable `ROADMAP_COOKIE_SECURE=true` (see "The VPN setup:
+- **TLS at the ingress.** If the ingress ends HTTPS, add the variable `OVERLENS_COOKIE_SECURE=true` (see "The VPN setup:
   cookies and proxies"). Behind the ingress everybody also shares one login lockout, as with CapRover.
 - **Backups.** They go to the second volume, which is often on the same storage system as the first. Copy `/backups` off the
   cluster (a `CronJob`, or your storage's snapshots) if you need to survive losing that storage.
-- **Restoring** follows "Restoring a backup by hand": scale down with `kubectl -n roadmap scale deploy/roadmap --replicas=0`,
+- **Restoring** follows "Restoring a backup by hand": scale down with `kubectl -n overlens scale deploy/overlens --replicas=0`,
   replace the database on the data volume from a temporary pod that mounts it (delete the `-wal` and `-shm` files, keep
   owner 65532), then scale up with `--replicas=1`.
 - **Upgrading:** push a new image tag, change `image:` and apply again. `Recreate` stops the old pod before the new one starts.
@@ -415,34 +415,34 @@ be read.
 
 - Linux and Windows: `curl http://localhost:8080/health`.
 - Docker: the distroless image has no shell, `curl` or `wget`, so the image's `HEALTHCHECK` and the compose `healthcheck`
-  run the program itself: `/app/roadmap -healthcheck` asks `http://127.0.0.1:<port>/health` (the configured port), prints
+  run the program itself: `/app/overlens -healthcheck` asks `http://127.0.0.1:<port>/health` (the configured port), prints
   nothing and exits 0 on `200`, and otherwise prints one line to stderr and exits 1. `docker ps` shows `healthy` once it passes.
 - Kubernetes: the Deployment's readiness and liveness probes call `/health` over HTTP.
 
 ## Restoring a backup by hand
 
-The program makes `roadmap-YYYY-MM-DD.db` in the backup folder every day (at `backup_time`) and keeps the newest
+The program makes `overlens-YYYY-MM-DD.db` in the backup folder every day (at `backup_time`) and keeps the newest
 `backup_keep_days`. It never restores one by itself. To go back to a backup:
 
-1. Stop the program (`systemctl stop roadmap`, `sc.exe stop Roadmap`, `docker compose stop roadmap`, or scale the Kubernetes
+1. Stop the program (`systemctl stop overlens`, `sc.exe stop Overlens`, `docker compose stop overlens`, or scale the Kubernetes
    Deployment to 0).
-2. Keep what is there: copy `roadmap-database.db` somewhere else (and `roadmap-database.db-wal` if present).
-3. Copy the chosen backup over the database file, named `roadmap-database.db`.
-4. **Delete `roadmap-database.db-wal` and `roadmap-database.db-shm`** next to it. They belong to the old database; leaving them can corrupt the
+2. Keep what is there: copy `overlens-database.db` somewhere else (and `overlens-database.db-wal` if present).
+3. Copy the chosen backup over the database file, named `overlens-database.db`.
+4. **Delete `overlens-database.db-wal` and `overlens-database.db-shm`** next to it. They belong to the old database; leaving them can corrupt the
    restored one.
-5. Make sure the file belongs to the service user (`chown roadmap:roadmap` on Linux, `chown 65532:65532` for Docker; on Windows
-   the account `svc-roadmap` needs Modify rights).
+5. Make sure the file belongs to the service user (`chown overlens:overlens` on Linux, `chown 65532:65532` for Docker; on Windows
+   the account `svc-overlens` needs Modify rights).
 6. Start the program and check the log and `/health`.
 
 Example for Docker with the paths above:
 
 ```
-docker compose stop roadmap
-cp /srv/roadmap/data/roadmap-database.db /srv/roadmap/roadmap-database.db.before-restore
-cp /srv/roadmap/backups/roadmap-2026-10-01.db /srv/roadmap/data/roadmap-database.db
-rm -f /srv/roadmap/data/roadmap-database.db-wal /srv/roadmap/data/roadmap-database.db-shm
-chown 65532:65532 /srv/roadmap/data/roadmap-database.db
-docker compose start roadmap
+docker compose stop overlens
+cp /srv/overlens/data/overlens-database.db /srv/overlens/overlens-database.db.before-restore
+cp /srv/overlens/backups/overlens-2026-10-01.db /srv/overlens/data/overlens-database.db
+rm -f /srv/overlens/data/overlens-database.db-wal /srv/overlens/data/overlens-database.db-shm
+chown 65532:65532 /srv/overlens/data/overlens-database.db
+docker compose start overlens
 ```
 
 Changes made after the backup's date are lost. Sessions are part of the database, so people who logged in after that date
@@ -450,7 +450,7 @@ have to log in again.
 
 ## Versions
 
-Every build says which version it is: `roadmap -version`, the first line of the log, `GET /health` and the admin
+Every build says which version it is: `overlens -version`, the first line of the log, `GET /health` and the admin
 screen's Storage section. `make version` prints the version a build from this checkout gets: the release tag (`v1.2.0`
 gives `1.2.0`; a later commit reads like `1.2.0-3-gabc1234`, uncommitted changes add `-dirty`), or the `VERSION` file
 where there is no tag or no git (REQ_DEPLOY_010).
@@ -465,24 +465,28 @@ publish the GitHub release with the downloads; then set `VERSION` to the next pl
 
 ## Upgrading
 
-1. Back up. The newest file in the backup folder is a good copy, but the safest is to stop the program and copy `roadmap-database.db`
-   (`roadmap.db` on an installation from before the rename, see step 5)
+1. Back up. The newest file in the backup folder is a good copy, but the safest is to stop the program and copy `overlens-database.db`
+   (`overlens.db` on an installation from before the rename, see step 5)
    (see "Restoring a backup by hand").
 2. Replace the program:
-   - Linux: `make build-linux`, then `systemctl stop roadmap`, `install -m 755 dist/roadmap /opt/roadmap/roadmap`,
-     `systemctl start roadmap`.
-   - Windows: `make build-windows`, `sc.exe stop Roadmap`, replace `roadmap.exe`, `sc.exe start Roadmap`.
+   - Linux: `make build-linux`, then `systemctl stop overlens`, `install -m 755 dist/overlens /opt/overlens/overlens`,
+     `systemctl start overlens`.
+   - Windows: `make build-windows`, `sc.exe stop Overlens`, replace `overlens.exe`, `sc.exe start Overlens`.
    - Docker: `git pull`, then `docker compose up -d --build`. The old container is replaced, the data stays in `DATA_DIR`.
-   - Kubernetes: push a new image tag, change `image:` in `roadmap.yaml`, `kubectl apply -f roadmap.yaml`.
+   - Kubernetes: push a new image tag, change `image:` in `overlens.yaml`, `kubectl apply -f overlens.yaml`.
 3. Database upgrades run on start and are logged. If a start fails, the log says why; restore the backup from step 1 and start
    the previous program.
-4. New config keys have defaults, so an old `roadmap.conf` keeps working. A key the program does not know is an error, so do
-   not copy a newer `roadmap.conf` onto an older program.
-5. **The database file was renamed** from `roadmap.db` to `roadmap-database.db` (2026-10-17). An installation that still has
-   `roadmap.db` in its data folder keeps working: when `roadmap-database.db` does not exist next to it, the program opens
-   `roadmap.db` and logs a warning. To finish the rename, stop the program, rename `roadmap.db` to `roadmap-database.db`
-   (and `roadmap.db-wal` and `roadmap.db-shm` to match if they exist), and start it again. An installation that sets `db_path`
-   (or `ROADMAP_DB_PATH`) to some other name is not affected. Backups keep their names (`roadmap-YYYY-MM-DD.db`).
+4. New config keys have defaults, so an old `overlens.conf` keeps working. A key the program does not know is an error, so do
+   not copy a newer `overlens.conf` onto an older program.
+5. **The files were renamed from "roadmap" to "overlens"** (2026-10-31). The program reads only the new names and never
+   renames or deletes anything itself; an installation that keeps the old names starts on an **empty database** (the old
+   file stays untouched beside it). Before the first start of the new program, stop the old one and rename:
+   `roadmap` / `roadmap.exe` to `overlens` / `overlens.exe`, `roadmap.conf` to `overlens.conf`, `roadmap-database.db`
+   to `overlens-database.db` (remove `roadmap-database.db-wal` and `roadmap-database.db-shm` first, after copying the
+   database somewhere safe), and the backups `roadmap-YYYY-MM-DD.db` to `overlens-YYYY-MM-DD.db` (until then the daily
+   pruning does not see them). The `ROADMAP_*` environment variables keep working and log a warning; `OVERLENS_*` wins
+   when both are set. Service names, folders and users in this guide changed the same way, but an existing service can
+   keep its old name. An installation that sets `db_path` (or `OVERLENS_DB_PATH`) to some other name is not affected.
 
 ## The VPN setup: cookies and proxies
 
@@ -492,7 +496,7 @@ accepted trade-offs:
 - **Session cookie.** It is `HttpOnly` and `SameSite=Lax`, and `Secure` only when the request itself arrived over TLS.
   `X-Forwarded-Proto` is not trusted. Over plain HTTP on the VPN the cookie is sent without `Secure`, which is the intended
   `cookie_secure: auto` behaviour. If you put a TLS-terminating proxy in front, either accept the same, or set
-  `cookie_secure: true` (`ROADMAP_COOKIE_SECURE=true`) so the cookie is always `Secure`. With `true` the browser sends the
+  `cookie_secure: true` (`OVERLENS_COOKIE_SECURE=true`) so the cookie is always `Secure`. With `true` the browser sends the
   cookie only over HTTPS, so logging in over plain HTTP no longer works.
 - **Login lockout and proxies.** Five failed logins from one address, or against one username, lock logins for 15 minutes.
   The address is the connection's, never `X-Forwarded-For`. Behind a reverse proxy everybody arrives from the proxy's address
@@ -506,7 +510,7 @@ address reachable from outside the VPN, the app is reachable from there too; che
 
 The app can answer AI assistants (Claude Code, Claude Desktop, other apps that speak MCP over HTTP) through a read-only
 endpoint at `/mcp`. It is **off** until your organisation decides to offer it: set `mcp_enabled: true`
-(`ROADMAP_MCP_ENABLED=true`) and restart. The start-up log says whether it is on.
+(`OVERLENS_MCP_ENABLED=true`) and restart. The start-up log says whether it is on.
 
 - It only reads and shows exactly what an anonymous visitor sees: no users, audit log, backups or settings. No login,
   no token.
@@ -523,4 +527,4 @@ endpoint at `/mcp`. It is **off** until your organisation decides to offer it: s
 
 ## Notes for whoever maintains these instructions
 
-- `make build-linux` and `make build-windows` write `dist/roadmap` and `dist/roadmap.exe` (the Makefile is the reference).
+- `make build-linux` and `make build-windows` write `dist/overlens` and `dist/overlens.exe` (the Makefile is the reference).

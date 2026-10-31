@@ -69,7 +69,7 @@ export function AuditCard() {
         Every change is recorded. Rows older than the retention period are deleted automatically.
       </p>
       <p className="text-xs text-text-3 mb-3" data-testid="audit-notice">
-        Set by <code>audit_retention_days</code> in <code>roadmap.conf</code> (default 365), not editable here. Older rows are
+        Set by <code>audit_retention_days</code> in <code>overlens.conf</code> (default 365), not editable here. Older rows are
         removed automatically; nobody can delete entries by hand.
       </p>
       <form

@@ -16,7 +16,7 @@ curl http://localhost:8080/api/roadmaps/1
 ### Logging in (admin-only access: create, update, delete)
 All `POST`, `PATCH`, `PUT` and `DELETE` requests (except `login` and `logout`) require an admin
 session cookie. The first admin is created from `bootstrap_admin_user` / `bootstrap_admin_password` in
-`roadmap.conf` the first time the server starts with no users. Log in with it and keep the cookie in a file
+`overlens.conf` the first time the server starts with no users. Log in with it and keep the cookie in a file
 (`-c` saves it, `-b` sends it):
 
 ```bash
@@ -140,7 +140,7 @@ the disk holding the database.
 ### Reading the audit log (admin only)
 
 It is read-only; there is no way to purge the audit log, delete a backup, run one on demand or change retention
-(those are `roadmap.conf` settings and the daily job's work). Filters combine with AND; `user`/`team` ignore case,
+(those are `overlens.conf` settings and the daily job's work). Filters combine with AND; `user`/`team` ignore case,
 `action`/`type` match exactly, `deliverable` is a substring of the name, `from`/`to` are inclusive UTC dates:
 
 ```bash
@@ -156,7 +156,7 @@ The server's own entries (backup, prune, retention purge) are recorded as the us
 curl -b cookies.txt "http://localhost:8080/api/admin/audit?user=system"
 ```
 ```json
-{"items":[{"id":2,"ts":"2026-10-01T16:15:08Z","username":"system","action":"audit.purge","entity_type":"system","entity_id":null,"roadmap_id":null,"details":{"cutoff":"2025-10-01","deleted":0,"retention_days":365}},{"id":1,"ts":"2026-10-01T16:15:08Z","username":"system","action":"backup.create","entity_type":"system","entity_id":null,"roadmap_id":null,"details":{"file":"roadmap-2026-10-01.db","size_bytes":131072}}],"total":2,"retention_days":365}
+{"items":[{"id":2,"ts":"2026-10-01T16:15:08Z","username":"system","action":"audit.purge","entity_type":"system","entity_id":null,"roadmap_id":null,"details":{"cutoff":"2025-10-01","deleted":0,"retention_days":365}},{"id":1,"ts":"2026-10-01T16:15:08Z","username":"system","action":"backup.create","entity_type":"system","entity_id":null,"roadmap_id":null,"details":{"file":"overlens-2026-10-01.db","size_bytes":131072}}],"total":2,"retention_days":365}
 ```
 
 The CSV takes the same filters (no `limit`/`offset`) and downloads as a file; cells that would start with `=`, `+`,
@@ -746,7 +746,7 @@ The CSV download has one row per roadmap item: a milestone prerequisite is named
 ## Company View Walkthrough
 
 The company view shows every team's roadmap together. These requests were replayed (with the admin cookie from the
-login above) against a scratch server built from `cmd/roadmap` on a temporary database. Setup: three teams (`Platform` 1,
+login above) against a scratch server built from `cmd/overlens` on a temporary database. Setup: three teams (`Platform` 1,
 `Mobile` 2, `Design` 3), each with its roadmap (ids 1, 2 and 3); in `Platform` and `Mobile` the first workstream was
 renamed to `Infrastructure` and `infrastructure` (the same workstream, spelled differently), `Mobile` also has `Apps`;
 deliverable 1 (`Public API v2`, Platform) is a prerequisite of deliverable 2 (`Mobile SDK`, Mobile).
@@ -905,13 +905,13 @@ curl "http://localhost:8080/api/company/attention?days=14"
 
 ### Switching on the AI connection
 
-The MCP endpoint is off until the installation switches it on in `roadmap.conf` and restarts:
+The MCP endpoint is off until the installation switches it on in `overlens.conf` and restarts:
 
 ```
 mcp_enabled: true
 ```
 
-(or `ROADMAP_MCP_ENABLED=true`). Off, `/mcp` answers `404`.
+(or `OVERLENS_MCP_ENABLED=true`). Off, `/mcp` answers `404`.
 
 ### Connecting an AI app
 
@@ -1149,7 +1149,7 @@ Response (404 Not Found):
 
 A roadmap can be downloaded as a CSV file for spreadsheets; the top bar's Download CSV button does the same. There is no JSON export and no import any more (the contract is in `docs/API.md`, "CSV download").
 
-It is a read, so it needs no login. `-OJ` saves the file under the name the server suggests (`roadmap-<team tag>-<title slug>-<YYYY-MM-DD>.csv`):
+It is a read, so it needs no login. `-OJ` saves the file under the name the server suggests (`overlens-<team tag>-<title slug>-<YYYY-MM-DD>.csv`):
 
 ```bash
 curl -OJ http://localhost:8080/api/roadmaps/1/export.csv

@@ -14,7 +14,7 @@ import (
 // healthTimeout bounds the whole check; a variable so tests can shorten it.
 var healthTimeout = 3 * time.Second
 
-// healthcheck is `roadmap -healthcheck` (REQ_DEPLOY_009): the distroless image has no shell, curl or
+// healthcheck is `overlens -healthcheck` (REQ_DEPLOY_009): the distroless image has no shell, curl or
 // wget, so the container's HEALTHCHECK runs the binary itself. It asks GET /health on 127.0.0.1 at the
 // configured port and returns 0 on a 200, else 1. It prints nothing except one line to stderr on a
 // failure, and writes no log file (it runs every few seconds).

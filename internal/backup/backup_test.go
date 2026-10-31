@@ -123,7 +123,7 @@ func Test_REQ_AUD_010_REQ_AUD_011_backup_is_a_consistent_snapshot_renamed_into_p
 		s.Backup(context.Background())
 		f.env.Team(testutil.TeamOpts{Name: "Beta"})
 		s.Backup(context.Background())
-		if got := openCopy(t, f.file("roadmap-2030-03-15.db")); got != 2 {
+		if got := openCopy(t, f.file("overlens-2030-03-15.db")); got != 2 {
 			t.Fatalf("second run did not replace the file: %d teams", got)
 		}
 		ents, _ := os.ReadDir(f.dir)
@@ -139,7 +139,7 @@ func Test_REQ_AUD_010_REQ_AUD_011_backup_is_a_consistent_snapshot_renamed_into_p
 	if !f.svc().Backup(context.Background()) {
 		t.Fatal("backup failed")
 	}
-	if got := openCopy(t, f.file("roadmap-2030-03-15.db")); got != 2 {
+	if got := openCopy(t, f.file("overlens-2030-03-15.db")); got != 2 {
 		t.Fatalf("backup has %d teams, want 2", got)
 	}
 	ents, _ := os.ReadDir(f.dir)
@@ -152,15 +152,15 @@ func Test_REQ_AUD_010_REQ_AUD_011_backup_is_a_consistent_snapshot_renamed_into_p
 func Test_REQ_AUD_012_prune_keeps_newest_n_and_only_matching_names(t *testing.T) {
 	t.Run("future dated files do not rank as newest and are never deleted", func(t *testing.T) {
 		f := newFixture(t) // KeepDays 3, today 2030-03-15
-		for _, n := range []string{"roadmap-2030-03-11.db", "roadmap-2030-03-12.db", "roadmap-2030-03-13.db", "roadmap-2031-01-01.db", "roadmap-2031-01-02.db"} {
+		for _, n := range []string{"overlens-2030-03-11.db", "overlens-2030-03-12.db", "overlens-2030-03-13.db", "overlens-2031-01-01.db", "overlens-2031-01-02.db"} {
 			f.touch(t, n)
 		}
 		if !f.svc().Backup(context.Background()) {
 			t.Fatal("backup failed")
 		}
 		// ranked among the real ones: 15, 13, 12 stay; 11 goes. The future files are left alone.
-		for n, want := range map[string]bool{"roadmap-2030-03-15.db": true, "roadmap-2030-03-13.db": true, "roadmap-2030-03-12.db": true,
-			"roadmap-2030-03-11.db": false, "roadmap-2031-01-01.db": true, "roadmap-2031-01-02.db": true} {
+		for n, want := range map[string]bool{"overlens-2030-03-15.db": true, "overlens-2030-03-13.db": true, "overlens-2030-03-12.db": true,
+			"overlens-2030-03-11.db": false, "overlens-2031-01-01.db": true, "overlens-2031-01-02.db": true} {
 			if f.exists(n) != want {
 				t.Errorf("%s exists=%v, want %v", n, f.exists(n), want)
 			}
@@ -168,23 +168,23 @@ func Test_REQ_AUD_012_prune_keeps_newest_n_and_only_matching_names(t *testing.T)
 	})
 
 	f := newFixture(t) // KeepDays 3
-	for _, n := range []string{"roadmap-2030-03-10.db", "roadmap-2030-03-11.db", "roadmap-2030-03-12.db", "roadmap-2030-03-13.db",
-		"roadmap-2030-03-01.db.bak", "roadmap-2030-3-1.db", "notes.txt", "my-roadmap-2030-03-01.db", "roadmap-2030-03-01.db-wal"} {
+	for _, n := range []string{"overlens-2030-03-10.db", "overlens-2030-03-11.db", "overlens-2030-03-12.db", "overlens-2030-03-13.db",
+		"overlens-2030-03-01.db.bak", "overlens-2030-3-1.db", "notes.txt", "my-overlens-2030-03-01.db", "overlens-2030-03-01.db-wal"} {
 		f.touch(t, n)
 	}
-	if err := os.Mkdir(f.file("roadmap-2020-01-01.db"), 0o755); err != nil { // a folder is never touched
+	if err := os.Mkdir(f.file("overlens-2020-01-01.db"), 0o755); err != nil { // a folder is never touched
 		t.Fatal(err)
 	}
 	if !f.svc().Backup(context.Background()) {
 		t.Fatal("backup failed")
 	}
-	for _, gone := range []string{"roadmap-2030-03-10.db", "roadmap-2030-03-11.db"} {
+	for _, gone := range []string{"overlens-2030-03-10.db", "overlens-2030-03-11.db"} {
 		if f.exists(gone) {
 			t.Errorf("%s should have been pruned", gone)
 		}
 	}
-	for _, kept := range []string{"roadmap-2030-03-12.db", "roadmap-2030-03-13.db", "roadmap-2030-03-15.db",
-		"roadmap-2030-03-01.db.bak", "roadmap-2030-3-1.db", "notes.txt", "my-roadmap-2030-03-01.db", "roadmap-2030-03-01.db-wal", "roadmap-2020-01-01.db"} {
+	for _, kept := range []string{"overlens-2030-03-12.db", "overlens-2030-03-13.db", "overlens-2030-03-15.db",
+		"overlens-2030-03-01.db.bak", "overlens-2030-3-1.db", "notes.txt", "my-overlens-2030-03-01.db", "overlens-2030-03-01.db-wal", "overlens-2020-01-01.db"} {
 		if !f.exists(kept) {
 			t.Errorf("%s must not be touched", kept)
 		}
@@ -212,12 +212,12 @@ func Test_REQ_AUD_012_REQ_AUD_014_failed_backup_prunes_nothing_and_audits_backup
 	})
 
 	f := newFixture(t) // KeepDays 3
-	old := []string{"roadmap-2030-03-08.db", "roadmap-2030-03-09.db", "roadmap-2030-03-10.db", "roadmap-2030-03-11.db", "roadmap-2030-03-12.db"}
+	old := []string{"overlens-2030-03-08.db", "overlens-2030-03-09.db", "overlens-2030-03-10.db", "overlens-2030-03-11.db", "overlens-2030-03-12.db"}
 	for _, n := range old {
 		f.touch(t, n)
 	}
 	// A non-empty folder where the temp file must go makes VACUUM INTO fail, even for root.
-	tmp := f.file(".roadmap-2030-03-15.db.tmp")
+	tmp := f.file(".overlens-2030-03-15.db.tmp")
 	if err := os.MkdirAll(tmp, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -264,7 +264,7 @@ func Test_REQ_AUD_013_REQ_AUD_009_catch_up_runs_once_when_todays_slot_was_missed
 	f := newFixture(t) // now 05:00, scheduled 04:00
 	s := f.svc()
 	s.CatchUp(context.Background())
-	if !f.exists("roadmap-2030-03-15.db") || f.r.count("backup.create") != 1 {
+	if !f.exists("overlens-2030-03-15.db") || f.r.count("backup.create") != 1 {
 		t.Fatal("missed backup was not caught up")
 	}
 	s.CatchUp(context.Background()) // today's file exists now
@@ -275,7 +275,7 @@ func Test_REQ_AUD_013_REQ_AUD_009_catch_up_runs_once_when_todays_slot_was_missed
 	g := newFixture(t)
 	g.now = time.Date(2030, 3, 15, 3, 0, 0, 0, time.Local) // before the slot
 	g.svc().CatchUp(context.Background())
-	if g.exists("roadmap-2030-03-15.db") {
+	if g.exists("overlens-2030-03-15.db") {
 		t.Fatal("no catch-up before today's scheduled time")
 	}
 
@@ -310,7 +310,7 @@ func Test_REQ_AUD_004_REQ_AUD_005_purge_runs_only_after_a_successful_backup(t *t
 		f.o.Enabled = false
 		f.auditRow(t, "2000-01-01 00:00:00", "old")
 		f.svc().RunDaily(context.Background())
-		if f.auditCount(t) != 0 || f.exists("roadmap-2030-03-15.db") || f.r.count("backup.create") != 0 {
+		if f.auditCount(t) != 0 || f.exists("overlens-2030-03-15.db") || f.r.count("backup.create") != 0 {
 			t.Fatal("with backups off the purge runs and no backup is made")
 		}
 		// Caught up at start only when today's purge has not happened yet.
@@ -376,7 +376,7 @@ func Test_REQ_AUD_004_purge_deletes_in_small_batches(t *testing.T) {
 
 func Test_REQ_AUD_015_status_reports_next_run_last_run_and_files_newest_first(t *testing.T) {
 	f := newFixture(t)
-	f.touch(t, "roadmap-2030-03-01.db")
+	f.touch(t, "overlens-2030-03-01.db")
 	f.touch(t, "junk.db")
 	s := f.svc()
 	st, _ := s.Status(context.Background())
@@ -426,7 +426,7 @@ func Test_REQ_AUD_010_requests_wait_for_a_backup_instead_of_deadlocking(t *testi
 			t.Fatal(err)
 		}
 	}
-	if !f.exists("roadmap-2030-03-15.db") {
+	if !f.exists("overlens-2030-03-15.db") {
 		t.Fatal("backup missing")
 	}
 }

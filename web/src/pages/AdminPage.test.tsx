@@ -331,7 +331,7 @@ describe('REQ_AUD_016 / REQ_AUD_008 audit log card', () => {
     renderAdmin()
     await waitFor(() => expect(screen.getByTestId('retention-badge')).toHaveTextContent('Retention 365 days'))
     expect(screen.getByTestId('audit-notice').textContent).toBe(
-      'Set by audit_retention_days in roadmap.conf (default 365), not editable here. Older rows are removed automatically; nobody can delete entries by hand.',
+      'Set by audit_retention_days in overlens.conf (default 365), not editable here. Older rows are removed automatically; nobody can delete entries by hand.',
     )
   })
 

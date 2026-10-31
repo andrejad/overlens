@@ -18,10 +18,10 @@ precisely what the app does.
 | `requirements/REQ-*.md` | What the app must do, one requirement per line with a permanent ID (`REQ_FE_010`); start at `requirements/README.md` |
 | `docs/DEPLOY.md` | Every way to run it: download, Linux (systemd), Windows, Docker / Compose / Portainer, CapRover, Kubernetes; configuration, backups, upgrades, the AI connection (MCP) |
 | `docs/API.md`, `docs/API-USAGE.md` | The HTTP endpoints, and examples to copy |
-| `roadmap.conf.example` | Every setting, explained; any key can also be set as `ROADMAP_<KEY>` |
-| `docker-compose.yml`, `Dockerfile`, `captain-definition`, `deploy/` | Packaging; `deploy/START-HERE.txt` and `deploy/roadmap.conf` ship in the downloads |
+| `overlens.conf.example` | Every setting, explained; any key can also be set as `OVERLENS_<KEY>` |
+| `docker-compose.yml`, `Dockerfile`, `captain-definition`, `deploy/` | Packaging; `deploy/START-HERE.txt` and `deploy/overlens.conf` ship in the downloads |
 | `CHANGELOG.md` | What changed in each release |
-| `cmd/roadmap/` | The program's entry point |
+| `cmd/overlens/` | The program's entry point |
 | `internal/` | Go packages: `api` (handlers, MCP), `auth`, `audit`, `backup`, `config`, `logging`, `store` (SQLite), `demo` (sample data), `testutil` (test harness), `webui` |
 | `schema.sql` | The only database layout; `store.Converge` adds missing tables and columns on start |
 | `web/` | React + TypeScript + Vite + Tailwind frontend; `web/src/timeline/` is the timeline |
@@ -30,7 +30,7 @@ precisely what the app does.
 ## Build and test
 
 - Needs Go 1.27 and Node 22 with npm. `(cd web && npm install)` once.
-- `./start.sh` runs backend (8080) and frontend (5173) for development; `make build` makes the single `roadmap` program.
+- `./start.sh` runs backend (8080) and frontend (5173) for development; `make build` makes the single `overlens` program.
 - `make test` runs everything (Go, ESLint, Vitest, Playwright) and prints a PASS/FAIL line per layer. `make t AREA=fe`
   runs the tests of one requirement area. Run `make test` before calling a change done.
 - Tests build their own temporary database. Never point a test at a real database.

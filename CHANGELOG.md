@@ -5,6 +5,13 @@ All notable changes to Overlens are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.1.0] — 2026-10-31
+
+### Changed
+- The program, its settings file, the database and the backups are now named `overlens` (`overlens.exe`, `overlens.conf`,
+  `overlens-database.db`, `overlens-YYYY-MM-DD.db`). Rename the old files by hand when you upgrade; see "Upgrading" in
+  `docs/DEPLOY.md`. The `ROADMAP_*` environment variables still work but are replaced by `OVERLENS_*`.
+
 ## [1.0.0] — 2026-10-22
 
 The first public release.

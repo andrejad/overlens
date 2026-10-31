@@ -31,7 +31,7 @@ func Sample() (data []byte, ok bool) {
 	return b, err == nil
 }
 
-// Recorder writes one audit entry as the system user (cmd/roadmap passes the audit writer).
+// Recorder writes one audit entry as the system user (cmd/overlens passes the audit writer).
 type Recorder func(ctx context.Context, action string, details map[string]any) error
 
 // EnsureSample creates the sample company when enabled and the database has no team, no roadmap and no
@@ -43,7 +43,7 @@ func EnsureSample(ctx context.Context, db *sql.DB, enabled bool, today time.Time
 	return ensure(ctx, db, enabled, today, data, ok, record)
 }
 
-// EnsureFrom is EnsureSample with the sample file's bytes passed in; cmd/roadmap's tests use it to
+// EnsureFrom is EnsureSample with the sample file's bytes passed in; cmd/overlens's tests use it to
 // start a server on a broken sample without touching the embedded file.
 func EnsureFrom(ctx context.Context, db *sql.DB, enabled bool, today time.Time, data []byte, record Recorder) (bool, error) {
 	return ensure(ctx, db, enabled, today, data, true, record)

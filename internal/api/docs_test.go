@@ -48,7 +48,7 @@ func docEndpoints(t *testing.T) map[string]bool {
 
 // Test_REQ_API_001_routes_match_docs checks both directions: every endpoint a docs/API.md table documents is
 // really registered in internal/api/api.go, and every route registered there has a table row — so the
-// reference can't silently drift from what the server does. (GET /health is registered by cmd/roadmap and
+// reference can't silently drift from what the server does. (GET /health is registered by cmd/overlens and
 // documented outside a table; its own test covers it.)
 func Test_REQ_API_001_routes_match_docs(t *testing.T) {
 	documented, registered := docEndpoints(t), map[string]bool{}

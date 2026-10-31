@@ -48,7 +48,7 @@ func Test_REQ_API_023_export_csv_format(t *testing.T) {
 	if resp.StatusCode != 200 || resp.Header.Get("Content-Type") != "text/csv; charset=utf-8" {
 		t.Fatalf("%d %q", resp.StatusCode, resp.Header.Get("Content-Type"))
 	}
-	wantName := fmt.Sprintf("attachment; filename=\"roadmap-plt-2026-plan-v2-%s.csv\"", time.Now().Format("2006-01-02"))
+	wantName := fmt.Sprintf("attachment; filename=\"overlens-plt-2026-plan-v2-%s.csv\"", time.Now().Format("2006-01-02"))
 	if cd := resp.Header.Get("Content-Disposition"); cd != wantName {
 		t.Errorf("Content-Disposition %q, want %q", cd, wantName)
 	}

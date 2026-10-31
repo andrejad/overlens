@@ -25,7 +25,7 @@ func Test_REQ_DEPLOY_017_start_ends_with_where_to_open_the_app(t *testing.T) {
 	restoreLogger(t)
 	dir := t.TempDir()
 	port := pickFreePort(t)
-	conf := filepath.Join(dir, "roadmap.conf")
+	conf := filepath.Join(dir, "overlens.conf")
 	os.WriteFile(conf, []byte(fmt.Sprintf("bootstrap_admin_user: admin\nbootstrap_admin_password: s3cret-pass\nport: %d\nsample_data: false\n"+
 		"db_path: %s\nlog_dir: %s\nbackup_dir: %s\n", port, filepath.Join(dir, "d", "r.db"), filepath.Join(dir, "logs"), filepath.Join(dir, "b"))), 0o600)
 
@@ -81,7 +81,7 @@ func Test_REQ_DEPLOY_017_start_ends_with_where_to_open_the_app(t *testing.T) {
 		t.Fatalf("no closing frame:\n%s", block)
 	}
 	frame := block[:end]
-	for _, want := range []string{fmt.Sprintf("http://localhost:%d", port), `log in as "admin"`, "roadmap.conf", "Press Ctrl+C to stop Overlens."} {
+	for _, want := range []string{fmt.Sprintf("http://localhost:%d", port), `log in as "admin"`, "overlens.conf", "Press Ctrl+C to stop Overlens."} {
 		if !strings.Contains(frame, want) {
 			t.Errorf("message lacks %q:\n%s", want, frame)
 		}
@@ -123,12 +123,12 @@ type syncBuf struct {
 func (s *syncBuf) Write(p []byte) (int, error) { s.mu.Lock(); defer s.mu.Unlock(); return s.b.Write(p) }
 func (s *syncBuf) String() string              { s.mu.Lock(); defer s.mu.Unlock(); return s.b.String() }
 
-// REQ_DEPLOY_016: the ready roadmap.conf of the downloads loads and holds the chosen values.
+// REQ_DEPLOY_016: the ready overlens.conf of the downloads loads and holds the chosen values.
 func Test_REQ_DEPLOY_016_shipped_config_holds_the_chosen_values(t *testing.T) {
-	path := filepath.Join(testutil.RepoRoot(t), "deploy", "roadmap.conf")
+	path := filepath.Join(testutil.RepoRoot(t), "deploy", "overlens.conf")
 	cfg, err := config.Load(path, func(string) string { return "" })
 	if err != nil {
-		t.Fatalf("deploy/roadmap.conf does not load: %v", err)
+		t.Fatalf("deploy/overlens.conf does not load: %v", err)
 	}
 	dir := filepath.Dir(path)
 	got := fmt.Sprintf("%s/%s %d %v %v %v %s %d %d %d %s %s %s", cfg.BootstrapAdminUser, cfg.BootstrapAdminPassword, cfg.Port, cfg.SampleData, cfg.MCPEnabled,
@@ -136,7 +136,7 @@ func Test_REQ_DEPLOY_016_shipped_config_holds_the_chosen_values(t *testing.T) {
 	if want := "admin/admin 8080 true true true 04:00 10 365 365 INFO production auto"; got != want {
 		t.Errorf("values\n got %s\nwant %s", got, want)
 	}
-	for p, want := range map[string]string{cfg.DBPath: "overlens-data/db/roadmap-database.db", cfg.LogDir: "overlens-data/logs", cfg.BackupDir: "overlens-data/backups"} {
+	for p, want := range map[string]string{cfg.DBPath: "overlens-data/db/overlens-database.db", cfg.LogDir: "overlens-data/logs", cfg.BackupDir: "overlens-data/backups"} {
 		if rel, _ := filepath.Rel(dir, p); filepath.ToSlash(rel) != want {
 			t.Errorf("path %s, want %s beside the program", p, want)
 		}

@@ -42,7 +42,7 @@ func seedAuditSet(g *rig) {
 	seedAudit(g, "2030-01-02 09:00:00", "bob", "deliverable.create", "deliverable", `{"deliverable":"Launch Beta","roadmap":"R1","team":"Platform"}`)
 	seedAudit(g, "2030-01-03 10:00:00", "Ann", "deliverable.update", "deliverable", `{"deliverable":"Billing Rework","roadmap":"R2","team":"Payments"}`)
 	seedAudit(g, "2030-01-03 23:59:59", "ann", "dependency.create", "dependency", `{"from":"Billing Rework","from_team":"Payments","to":"Launch Beta","to_team":"Platform"}`)
-	seedAudit(g, "2030-01-04 00:00:00", "system", "backup.create", "system", `{"file":"roadmap-2030-01-04.db"}`)
+	seedAudit(g, "2030-01-04 00:00:00", "system", "backup.create", "system", `{"file":"overlens-2030-01-04.db"}`)
 }
 
 func getAudit(g *rig, query string) auditPage {
@@ -355,13 +355,13 @@ func Test_REQ_API_053_storage_reports_db_and_log_sizes(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	write("roadmap-database.db", 1000)
+	write("overlens-database.db", 1000)
 	write("app.log", 100)
 	write("2026-10-17-app.log", 200)
 	write("2026-10-17-app.2.log", 50)
 	write("notes.txt", 999)
 	root := chi.NewRouter()
-	api.New(g.DB, g.audit, api.WithStoragePaths(filepath.Join(dir, "roadmap-database.db"), dir), api.WithBuild("1.2.3", "2026-10-21T14:02:00Z", "abc1234")).Register(root)
+	api.New(g.DB, g.audit, api.WithStoragePaths(filepath.Join(dir, "overlens-database.db"), dir), api.WithBuild("1.2.3", "2026-10-21T14:02:00Z", "abc1234")).Register(root)
 	srv := httptest.NewServer(root)
 	t.Cleanup(srv.Close)
 	c := *g

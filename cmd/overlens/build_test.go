@@ -23,7 +23,7 @@ func Test_REQ_OVR_006_REQ_OVR_005_cross_builds_for_windows(t *testing.T) {
 		dir := t.TempDir()
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 		defer cancel()
-		cmd := exec.CommandContext(ctx, "go", "build", "-o", filepath.Join(dir, "roadmap"), "./cmd/roadmap")
+		cmd := exec.CommandContext(ctx, "go", "build", "-o", filepath.Join(dir, "overlens"), "./cmd/overlens")
 		cmd.Dir = root
 		cmd.Env = append(os.Environ(), "CGO_ENABLED=0")
 		if out, err := cmd.CombinedOutput(); err != nil {
@@ -35,7 +35,7 @@ func Test_REQ_OVR_006_REQ_OVR_005_cross_builds_for_windows(t *testing.T) {
 	dir := t.TempDir()
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()
-	cmd := exec.CommandContext(ctx, "go", "build", "-o", filepath.Join(dir, "roadmap.exe"), "./cmd/roadmap")
+	cmd := exec.CommandContext(ctx, "go", "build", "-o", filepath.Join(dir, "overlens.exe"), "./cmd/overlens")
 	cmd.Dir = root
 	cmd.Env = append(os.Environ(), "GOOS=windows", "GOARCH=amd64", "CGO_ENABLED=0")
 	if out, err := cmd.CombinedOutput(); err != nil {

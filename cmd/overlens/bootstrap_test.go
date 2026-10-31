@@ -20,7 +20,7 @@ func startServer(t *testing.T, dir, user, pw string) (string, func() int) {
 	t.Helper()
 	for attempt := 1; attempt <= 3; attempt++ {
 		port := pickFreePort(t)
-		conf := filepath.Join(dir, fmt.Sprintf("roadmap-%s-%d.conf", user, attempt))
+		conf := filepath.Join(dir, fmt.Sprintf("overlens-%s-%d.conf", user, attempt))
 		os.WriteFile(conf, []byte(fmt.Sprintf("bootstrap_admin_user: %s\nbootstrap_admin_password: %s\nport: %d\n"+
 			"db_path: %s\nlog_dir: %s\nbackup_dir: %s\n", user, pw, port, filepath.Join(dir, "data", "r.db"),
 			filepath.Join(dir, "logs"), filepath.Join(dir, "backups"))), 0o600)

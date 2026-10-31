@@ -12,7 +12,7 @@ import (
 
 func write(t *testing.T, body string) string {
 	t.Helper()
-	p := filepath.Join(t.TempDir(), "roadmap.conf")
+	p := filepath.Join(t.TempDir(), "overlens.conf")
 	if err := os.WriteFile(p, []byte(body), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -36,12 +36,12 @@ func Test_REQ_CFG_003_defaults(t *testing.T) {
 		if err != nil || c.Environment != "development" || c.SampleData || c.CookieSecure != "true" {
 			t.Fatalf("file values: %+v %v", c, err)
 		}
-		env := map[string]string{"ROADMAP_ENVIRONMENT": "production", "ROADMAP_SAMPLE_DATA": "true", "ROADMAP_COOKIE_SECURE": "auto"}
+		env := map[string]string{"OVERLENS_ENVIRONMENT": "production", "OVERLENS_SAMPLE_DATA": "true", "OVERLENS_COOKIE_SECURE": "auto"}
 		c, err = config.Load(write(t, req+"environment: development\nsample_data: false\ncookie_secure: true\n"), func(k string) string { return env[k] })
 		if err != nil || c.Environment != "production" || !c.SampleData || c.CookieSecure != "auto" {
 			t.Fatalf("env overrides: %+v %v", c, err)
 		}
-		if config.EnvName("cookie_secure") != "ROADMAP_COOKIE_SECURE" {
+		if config.EnvName("cookie_secure") != "OVERLENS_COOKIE_SECURE" {
 			t.Error("env name")
 		}
 	})
@@ -52,7 +52,7 @@ func Test_REQ_CFG_003_defaults(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if c.Port != 8080 || c.DBPath != filepath.Join(dir, "data", "roadmap-database.db") || c.LogDir != filepath.Join(dir, "logs") || c.LogLevel != "INFO" ||
+	if c.Port != 8080 || c.DBPath != filepath.Join(dir, "data", "overlens-database.db") || c.LogDir != filepath.Join(dir, "logs") || c.LogLevel != "INFO" ||
 		c.AuditRetentionDays != 365 || !c.BackupEnabled || c.BackupDir != filepath.Join(dir, "backups") || c.BackupTime != "04:00" ||
 		c.BackupKeepDays != 10 || c.SessionTTLDays != 365 || c.BootstrapAdminUser != "boss" {
 		t.Fatalf("unexpected defaults: %+v", c)
@@ -84,7 +84,7 @@ func Test_REQ_CFG_001_format_comments_and_colons(t *testing.T) {
 }
 
 func Test_REQ_CFG_002_env_overrides(t *testing.T) {
-	env := map[string]string{"ROADMAP_PORT": "9999", "ROADMAP_BOOTSTRAP_ADMIN_USER": "envadmin"}
+	env := map[string]string{"OVERLENS_PORT": "9999", "OVERLENS_BOOTSTRAP_ADMIN_USER": "envadmin"}
 	c, err := config.Load(write(t, req+"port: 1234\n"), func(k string) string { return env[k] })
 	if err != nil {
 		t.Fatal(err)
@@ -173,65 +173,76 @@ func Test_REQ_CFG_003_relative_paths_resolve_against_config_dir(t *testing.T) {
 	}
 }
 
-func Test_REQ_CFG_012_old_database_file_name_is_used_when_the_new_one_is_missing(t *testing.T) {
-	touch := func(path string) {
-		t.Helper()
-		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+// Test_REQ_CFG_015_database_file_name: the default database file is overlens-database.db; an old roadmap-database.db
+// or roadmap.db beside it is never picked up or renamed.
+func Test_REQ_CFG_015_database_file_name(t *testing.T) {
+	p := write(t, req)
+	dir := filepath.Dir(p)
+	for _, old := range []string{"roadmap.db", "roadmap-database.db"} {
+		if err := os.MkdirAll(filepath.Join(dir, "data"), 0o755); err != nil {
 			t.Fatal(err)
 		}
-		if err := os.WriteFile(path, []byte("x"), 0o600); err != nil {
+		if err := os.WriteFile(filepath.Join(dir, "data", old), []byte("x"), 0o600); err != nil {
 			t.Fatal(err)
 		}
 	}
-	load := func(extra string, files ...string) (string, string) {
-		t.Helper()
-		p := write(t, req+extra)
-		dir := filepath.Dir(p)
-		for _, f := range files {
-			touch(filepath.Join(dir, f))
+	c, err := config.Load(p, noEnv)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := filepath.Join(dir, "data", "overlens-database.db"); c.DBPath != want {
+		t.Fatalf("got %s, want %s", c.DBPath, want)
+	}
+	if _, err := os.Stat(c.DBPath); err == nil {
+		t.Fatal("loading the config must not create or rename a database file")
+	}
+}
+
+// Test_REQ_CFG_016_legacy_environment: OVERLENS_X wins over ROADMAP_X; ROADMAP_X alone still works and warns once
+// with the variable name, never the value.
+func Test_REQ_CFG_016_legacy_environment(t *testing.T) {
+	var logged strings.Builder
+	prev := slog.Default()
+	slog.SetDefault(slog.New(slog.NewTextHandler(&logged, nil)))
+	defer slog.SetDefault(prev)
+
+	env := func(m map[string]string) func(string) string { return func(k string) string { return m[k] } }
+	t.Run("the old name still works and warns", func(t *testing.T) {
+		c, err := config.Load(write(t, req), env(map[string]string{"ROADMAP_PORT": "9001", "ROADMAP_BOOTSTRAP_ADMIN_PASSWORD": "topsecret"}))
+		if err != nil || c.Port != 9001 || c.BootstrapAdminPassword != "topsecret" {
+			t.Fatalf("got %+v %v", c, err)
 		}
-		c, err := config.Load(p, noEnv)
-		if err != nil {
+		if out := logged.String(); !strings.Contains(out, "ROADMAP_PORT") || strings.Contains(out, "topsecret") || strings.Contains(out, "9001") {
+			t.Fatalf("expected a warning naming ROADMAP_PORT without any value, got %q", out)
+		}
+	})
+	t.Run("the new name wins", func(t *testing.T) {
+		logged.Reset()
+		c, err := config.Load(write(t, req), env(map[string]string{"OVERLENS_PORT": "9002", "ROADMAP_PORT": "9001"}))
+		if err != nil || c.Port != 9002 {
+			t.Fatalf("got %+v %v", c, err)
+		}
+		if strings.Contains(logged.String(), "deprecated") {
+			t.Fatalf("no warning expected when the new name is set: %q", logged.String())
+		}
+	})
+	t.Run("the password file variable and the log dir peek follow the same rule", func(t *testing.T) {
+		pw := filepath.Join(t.TempDir(), "pw")
+		if err := os.WriteFile(pw, []byte("fromfile\n"), 0o600); err != nil {
 			t.Fatal(err)
 		}
-		return dir, c.DBPath
-	}
-	t.Run("an existing installation keeps its data", func(t *testing.T) {
-		dir, got := load("", "data/roadmap.db")
-		if want := filepath.Join(dir, "data", "roadmap.db"); got != want {
-			t.Fatalf("got %s, want the old file %s", got, want)
+		c, err := config.Load(filepath.Join(t.TempDir(), "missing.conf"), env(map[string]string{
+			"ROADMAP_BOOTSTRAP_ADMIN_USER": "a", "ROADMAP_BOOTSTRAP_ADMIN_PASSWORD_FILE": pw}))
+		if err != nil || c.BootstrapAdminPassword != "fromfile" {
+			t.Fatalf("got %+v %v", c, err)
 		}
-		if _, err := os.Stat(filepath.Join(dir, "data", "roadmap-database.db")); err == nil {
-			t.Fatal("nothing may be created or renamed by loading the config")
-		}
-	})
-	t.Run("the new file wins when both exist", func(t *testing.T) {
-		dir, got := load("", "data/roadmap.db", "data/roadmap-database.db")
-		if want := filepath.Join(dir, "data", "roadmap-database.db"); got != want {
-			t.Fatalf("got %s, want %s", got, want)
-		}
-	})
-	t.Run("a fresh installation uses the new name", func(t *testing.T) {
-		dir, got := load("")
-		if want := filepath.Join(dir, "data", "roadmap-database.db"); got != want {
-			t.Fatalf("got %s, want %s", got, want)
-		}
-	})
-	t.Run("another name is used as written", func(t *testing.T) {
-		dir, got := load("db_path: ./data/mine.db\n", "data/roadmap.db")
-		if want := filepath.Join(dir, "data", "mine.db"); got != want {
-			t.Fatalf("got %s, want %s", got, want)
-		}
-	})
-	t.Run("an explicit new name in another folder falls back only beside itself", func(t *testing.T) {
-		dir, got := load("db_path: ./elsewhere/roadmap-database.db\n", "data/roadmap.db")
-		if want := filepath.Join(dir, "elsewhere", "roadmap-database.db"); got != want {
-			t.Fatalf("got %s, want %s", got, want)
+		if got := config.PeekLogDir(write(t, req), env(map[string]string{"ROADMAP_LOG_DIR": "/old/logs"})); got != filepath.FromSlash("/old/logs") {
+			t.Fatalf("peek got %q", got)
 		}
 	})
 }
 
-// Test_REQ_CFG_013_mcp_enabled: off by default, true/false in the file (any case) or ROADMAP_MCP_ENABLED, the
+// Test_REQ_CFG_013_mcp_enabled: off by default, true/false in the file (any case) or OVERLENS_MCP_ENABLED, the
 // variable wins, anything else stops the start, and the start-up summary says whether it is on.
 func Test_REQ_CFG_013_mcp_enabled(t *testing.T) {
 	c, err := config.Load(write(t, req), noEnv)
@@ -242,12 +253,12 @@ func Test_REQ_CFG_013_mcp_enabled(t *testing.T) {
 	if err != nil || !c.MCPEnabled {
 		t.Fatalf("file true: %+v %v", c, err)
 	}
-	env := map[string]string{"ROADMAP_MCP_ENABLED": "false"}
+	env := map[string]string{"OVERLENS_MCP_ENABLED": "false"}
 	c, err = config.Load(write(t, req+"mcp_enabled: true\n"), func(k string) string { return env[k] })
 	if err != nil || c.MCPEnabled {
 		t.Fatalf("env wins: %+v %v", c, err)
 	}
-	env["ROADMAP_MCP_ENABLED"] = "true"
+	env["OVERLENS_MCP_ENABLED"] = "true"
 	if c, err = config.Load(write(t, req), func(k string) string { return env[k] }); err != nil || !c.MCPEnabled {
 		t.Fatalf("env true: %+v %v", c, err)
 	}

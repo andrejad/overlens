@@ -10,7 +10,7 @@ const baseURL = `http://127.0.0.1:${port}`
 // (REQ_TEST_005/006) — see e2e/global-setup.ts for why the script mints that directory itself
 // rather than reading ERM_E2E_DIR (webServer starts before globalSetup runs). 01-no-overlap.spec.ts measures only the
 // real app (team roadmap, company view, trace), never the wireframes. The server runs without the sample company
-// (ROADMAP_SAMPLE_DATA=false, REQ_TEST_020). Every spec file belongs to exactly one project (checked by
+// (OVERLENS_SAMPLE_DATA=false, REQ_TEST_020). Every spec file belongs to exactly one project (checked by
 // src/playwright-ordering.test.ts).
 // Auth (Phase 6): the real server enforces sessions, so global-setup.ts logs in as the bootstrap admin
 // and writes a storageState file; the browser projects that edit (core, copies, dependencies) use it and

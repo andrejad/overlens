@@ -21,7 +21,7 @@ var (
 	blankRe    = regexp.MustCompile(`\n{3,}`)
 )
 
-// exportName is roadmap-<team tag>-<title slug>-<YYYY-MM-DD>.<ext>; ASCII only, so the header is safe.
+// exportName is overlens-<team tag>-<title slug>-<YYYY-MM-DD>.<ext>; ASCII only, so the header is safe.
 func exportName(f *store.RoadmapFile, now time.Time, ext string) string {
 	slug := strings.Trim(slugRe.ReplaceAllString(strings.ToLower(f.Title), "-"), "-")
 	if len(slug) > 60 {
@@ -30,7 +30,7 @@ func exportName(f *store.RoadmapFile, now time.Time, ext string) string {
 	if slug == "" {
 		slug = "roadmap"
 	}
-	return fmt.Sprintf("roadmap-%s-%s-%s.%s", strings.ToLower(f.Team.Tag), slug, now.Format("2006-01-02"), ext)
+	return fmt.Sprintf("overlens-%s-%s-%s.%s", strings.ToLower(f.Team.Tag), slug, now.Format("2006-01-02"), ext)
 }
 
 func (a *API) exportFile(w http.ResponseWriter, r *http.Request) (*store.RoadmapFile, time.Time, bool) {

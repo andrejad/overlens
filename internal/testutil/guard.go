@@ -70,7 +70,7 @@ func GuardDBPath(path, root string) error {
 	if repo, err := repoRoot(); err == nil && within(resolve(repo), p) {
 		return fmt.Errorf("guard: database path %q is inside the repository", path)
 	}
-	for _, k := range []string{"ROADMAP_DB", "ROADMAP_DB_PATH", "DB_PATH", "DATABASE_PATH"} {
+	for _, k := range []string{"OVERLENS_DB", "OVERLENS_DB_PATH", "ROADMAP_DB", "ROADMAP_DB_PATH", "DB_PATH", "DATABASE_PATH"} {
 		if v := os.Getenv(k); v != "" && resolve(v) == p {
 			return fmt.Errorf("guard: database path %q equals the dev/prod path in %s", path, k)
 		}

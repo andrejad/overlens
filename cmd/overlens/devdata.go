@@ -1,6 +1,6 @@
 package main
 
-// `roadmap -dev-data <file> [--reset]` (REQ_DEMO_016-018): loads the development company into the
+// `overlens -dev-data <file> [--reset]` (REQ_DEMO_016-018): loads the development company into the
 // development database, then exits. It never starts the server.
 
 import (

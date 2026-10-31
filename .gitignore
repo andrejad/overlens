@@ -10,8 +10,8 @@ web/*.tsbuildinfo
 *.db
 *.db-journal
 *.log
-/roadmap.conf
-/roadmap
+/overlens.conf
+/overlens
 /data/
 /logs/
 /backups/

@@ -32,10 +32,10 @@ describe('REQ_TEST_007 the e2e global teardown removes its erm-test directory', 
 
 // REQ_TEST_020: the browser tests' server never creates the shipped sample company and does not inherit settings.
 describe('REQ_TEST_020 the e2e server starts without sample data', () => {
-  it('REQ_TEST_020 start-server.sh drops inherited ROADMAP_* variables, then sets sample data off', () => {
+  it('REQ_TEST_020 start-server.sh drops inherited OVERLENS_* variables, then sets sample data off', () => {
     const script = readFileSync(join(__dirname, '..', 'e2e', 'start-server.sh'), 'utf8')
-    const unset = script.indexOf("grep '^ROADMAP_'")
-    const sampleOff = script.indexOf('export ROADMAP_SAMPLE_DATA=false')
+    const unset = script.indexOf("grep '^OVERLENS_'")
+    const sampleOff = script.indexOf('export OVERLENS_SAMPLE_DATA=false')
     expect(unset).toBeGreaterThan(-1)
     expect(sampleOff).toBeGreaterThan(unset) // exported after the inherited ones are gone
   })

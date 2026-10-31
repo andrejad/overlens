@@ -48,7 +48,8 @@ test('REQ_FE_100 edit name, date, workstream and description field by field, pre
   await expect(panel).toContainText(note)
 
   await page.reload()
-  await expect(ms(page, M.id)).toContainText(newName)
+  // the diamond draws its name only when it has room (not at the grid's last day), the aria-label always has it
+  await expect(ms(page, M.id)).toHaveAttribute('aria-label', new RegExp(newName))
   await ms(page, M.id).click()
   await expect(panel).toContainText(note)
   await expect(panel).toContainText(ws[1].name)

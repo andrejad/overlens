@@ -13,7 +13,7 @@ import (
 // blockTempFile makes VACUUM INTO fail: a non-empty folder sits where the temp file must go.
 func blockTempFile(t *testing.T, f *fixture, day string) {
 	t.Helper()
-	tmp := f.file(".roadmap-" + day + ".db.tmp")
+	tmp := f.file(".overlens-" + day + ".db.tmp")
 	if err := os.MkdirAll(tmp, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +54,7 @@ func Test_REQ_AUD_014_failures_never_expose_server_paths(t *testing.T) {
 	root := filepath.Dir(f.dir)
 	d := f.r.details["backup.fail"]
 	raw, _ := json.Marshal(d)
-	if d["error"] != "could not create the backup file" || d["file"] != "roadmap-2030-03-15.db" || strings.Contains(string(raw), root) {
+	if d["error"] != "could not create the backup file" || d["file"] != "overlens-2030-03-15.db" || strings.Contains(string(raw), root) {
 		t.Errorf("audit details %s", raw)
 	}
 	st, err := s.Status(context.Background())
@@ -85,8 +85,8 @@ func Test_REQ_AUD_014_failures_never_expose_server_paths(t *testing.T) {
 // Test_REQ_AUD_012_names_with_an_invalid_date_are_never_listed_counted_or_deleted.
 func Test_REQ_AUD_012_names_with_an_invalid_date_are_never_listed_counted_or_deleted(t *testing.T) {
 	f := newFixture(t) // KeepDays 3, today 2030-03-15
-	odd := []string{"roadmap-2099-99-99.db", "roadmap-2030-02-30.db", "roadmap-0000-00-00.db", "roadmap-2030-13-01.db"}
-	for _, n := range append([]string{"roadmap-2030-03-10.db", "roadmap-2030-03-11.db", "roadmap-2030-03-12.db", "roadmap-2030-03-13.db"}, odd...) {
+	odd := []string{"overlens-2099-99-99.db", "overlens-2030-02-30.db", "overlens-0000-00-00.db", "overlens-2030-13-01.db"}
+	for _, n := range append([]string{"overlens-2030-03-10.db", "overlens-2030-03-11.db", "overlens-2030-03-12.db", "overlens-2030-03-13.db"}, odd...) {
 		f.touch(t, n)
 	}
 	s := f.svc()
@@ -103,8 +103,8 @@ func Test_REQ_AUD_012_names_with_an_invalid_date_are_never_listed_counted_or_del
 		}
 	}
 	// 4 real + today = 5, keep 3: the two oldest real ones go. If the odd names counted, more would go.
-	for gone, want := range map[string]bool{"roadmap-2030-03-10.db": false, "roadmap-2030-03-11.db": false, "roadmap-2030-03-12.db": true,
-		"roadmap-2030-03-13.db": true, "roadmap-2030-03-15.db": true} {
+	for gone, want := range map[string]bool{"overlens-2030-03-10.db": false, "overlens-2030-03-11.db": false, "overlens-2030-03-12.db": true,
+		"overlens-2030-03-13.db": true, "overlens-2030-03-15.db": true} {
 		if f.exists(gone) != want {
 			t.Errorf("%s exists=%v, want %v", gone, f.exists(gone), want)
 		}

@@ -24,7 +24,7 @@ import (
 )
 
 // namePattern is the only kind of file this package ever lists or deletes (REQ_AUD_012).
-var namePattern = regexp.MustCompile(`^roadmap-(\d{4}-\d{2}-\d{2})\.db$`)
+var namePattern = regexp.MustCompile(`^overlens-(\d{4}-\d{2}-\d{2})\.db$`)
 
 // Recorder writes one audit entry as the system user (REQ_AUD_014, 020). main.go adapts
 // internal/audit's writer to it; a failure is only logged here.
@@ -136,7 +136,7 @@ func (s *Service) CatchUp(ctx context.Context) {
 	}
 	day := now.Format("2006-01-02")
 	if s.o.Enabled {
-		if _, err := os.Stat(filepath.Join(s.o.Dir, "roadmap-"+day+".db")); err == nil {
+		if _, err := os.Stat(filepath.Join(s.o.Dir, "overlens-"+day+".db")); err == nil {
 			slog.Info("backup: no catch-up needed, today's backup exists", "day", day)
 			return
 		}
@@ -171,7 +171,7 @@ func (s *Service) RunDaily(ctx context.Context) {
 func (s *Service) Backup(ctx context.Context) bool {
 	now := s.o.Now()
 	day := now.Format("2006-01-02")
-	name := "roadmap-" + day + ".db"
+	name := "overlens-" + day + ".db"
 	slog.Info("backup: starting", "file", name, "dir", s.o.Dir)
 	size, err := s.snapshot(ctx, day, name)
 	rctx := context.WithoutCancel(ctx) // the outcome is recorded even while shutting down
@@ -207,7 +207,7 @@ func (s *Service) snapshot(ctx context.Context, day, name string) (int64, error)
 		return 0, stepFailed("create the backup folder", err)
 	}
 	final := filepath.Join(s.o.Dir, name)
-	tmp := filepath.Join(s.o.Dir, ".roadmap-"+day+".db.tmp")
+	tmp := filepath.Join(s.o.Dir, ".overlens-"+day+".db.tmp")
 	_ = os.Remove(tmp) // VACUUM INTO refuses an existing file
 	if _, err := s.db.ExecContext(ctx, "VACUUM INTO ?", tmp); err != nil {
 		_ = os.Remove(tmp)
@@ -239,7 +239,7 @@ func (s *Service) snapshot(ctx context.Context, day, name string) (int64, error)
 	return st.Size(), nil
 }
 
-// prune keeps the newest KeepDays files named exactly roadmap-YYYY-MM-DD.db and deletes the rest.
+// prune keeps the newest KeepDays files named exactly overlens-YYYY-MM-DD.db and deletes the rest.
 // Only called after a successful backup (REQ_AUD_012).
 func (s *Service) prune(ctx context.Context) {
 	all, err := s.list()

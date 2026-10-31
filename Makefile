@@ -9,15 +9,15 @@ export LOG_PREFIX := test
 # Deliberately does not build the frontend (REQ_OVR_008's SPA fallback degrades to a "not built"
 # message when web/dist has no index.html yet — see internal/webui) — use `make build` for that.
 run:
-	LOG_PREFIX= go run -ldflags "$(LDFLAGS)" ./cmd/roadmap -config $(CURDIR)/roadmap.conf
+	LOG_PREFIX= go run -ldflags "$(LDFLAGS)" ./cmd/overlens -config $(CURDIR)/overlens.conf
 
 # Builds the frontend, then the single Go binary that embeds it (REQ_OVR_007/008).
 build:
 	cd web && npm run build
-	go build -ldflags "$(LDFLAGS)" -o roadmap ./cmd/roadmap
+	go build -ldflags "$(LDFLAGS)" -o overlens ./cmd/overlens
 
 # Version stamping (REQ_DEPLOY_010): -ldflags set main.version / main.buildTime / main.commit, which
-# `roadmap -version` prints and the start-up log line carries. The version is the release tag vX.Y.Z without the v
+# `overlens -version` prints and the start-up log line carries. The version is the release tag vX.Y.Z without the v
 # (git describe: "1.0.0-3-gabc1234" after it, "-dirty" with uncommitted changes); with no such tag, or no git, it is
 # the VERSION file (REQ_DEPLOY_015 says when it changes). `make version` prints it. `:=`, not `?=`: a VERSION variable
 # in the environment must not win over the tag and the file (only `make VERSION=x` on the command line does).
@@ -30,18 +30,18 @@ version:
 	@echo $(VERSION)
 
 # The downloads of a release (REQ_DEPLOY_016): one archive per platform in dist/release/, each with the program, START-HERE.txt,
-# the ready deploy/roadmap.conf as roadmap.conf, LICENSE and CHANGELOG.md, plus SHA256SUMS (no README.md: the repository shows it). Windows gets a .zip (made with Python's
+# the ready deploy/overlens.conf as overlens.conf, LICENSE and CHANGELOG.md, plus SHA256SUMS (no README.md: the repository shows it). Windows gets a .zip (made with Python's
 # zipfile, so no zip tool is needed), the others a .tar.gz. Entries are GOOS/GOARCH/label.
 RELEASE_TARGETS = windows/amd64/x64 linux/amd64/x64 linux/arm64/arm64 darwin/arm64/arm64 darwin/amd64/x64
 release-files: web-dist
 	rm -rf dist/release && mkdir -p dist/release
 	@set -e; for t in $(RELEASE_TARGETS); do \
 	  os=$${t%%/*}; rest=$${t#*/}; arch=$${rest%%/*}; label=$${rest#*/}; \
-	  plat=$$os; exe=roadmap; [ $$os = darwin ] && plat=macos; [ $$os = windows ] && exe=roadmap.exe; \
+	  plat=$$os; exe=overlens; [ $$os = darwin ] && plat=macos; [ $$os = windows ] && exe=overlens.exe; \
 	  name=overlens-$(VERSION)-$$plat-$$label; d=dist/release/$$name; mkdir -p $$d; \
 	  echo "building $$name"; \
-	  CGO_ENABLED=0 GOOS=$$os GOARCH=$$arch go build -trimpath -ldflags "$(LDFLAGS)" -o $$d/$$exe ./cmd/roadmap; \
-	  cp deploy/START-HERE.txt LICENSE CHANGELOG.md $$d/; cp deploy/roadmap.conf $$d/roadmap.conf; \
+	  CGO_ENABLED=0 GOOS=$$os GOARCH=$$arch go build -trimpath -ldflags "$(LDFLAGS)" -o $$d/$$exe ./cmd/overlens; \
+	  cp deploy/START-HERE.txt LICENSE CHANGELOG.md $$d/; cp deploy/overlens.conf $$d/overlens.conf; \
 	  if [ $$os = windows ]; then (cd dist/release && python3 -m zipfile -c $$name.zip $$name/); \
 	  else tar -C dist/release -czf dist/release/$$name.tar.gz $$name; fi; \
 	  rm -rf $$d; \
@@ -55,17 +55,17 @@ web-dist:
 # The Linux program (REQ_DEPLOY_003) and, cross-built from Linux with no C toolchain, the Windows one
 # (REQ_DEPLOY_004). Both embed the frontend and are stamped with the version.
 build-linux: web-dist
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags "$(LDFLAGS)" -o dist/roadmap ./cmd/roadmap
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags "$(LDFLAGS)" -o dist/overlens ./cmd/overlens
 
 build-windows: web-dist
-	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "$(LDFLAGS)" -o dist/roadmap.exe ./cmd/roadmap
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "$(LDFLAGS)" -o dist/overlens.exe ./cmd/overlens
 
-# Loads dev/company.json into the development database (REQ_DEMO_018). Refuses unless roadmap.conf says
+# Loads dev/company.json into the development database (REQ_DEMO_018). Refuses unless overlens.conf says
 # `environment: development`, and unless the database has no team yet. `make dev-data RESET=1` wipes the
 # database first, after listing what it will delete and waiting for you to type yes. Like `make run`, the
 # test prefix is cleared so nothing reaches a test log.
 dev-data:
-	LOG_PREFIX= go run ./cmd/roadmap -config $(CURDIR)/roadmap.conf -dev-data dev/company.json $(if $(RESET),--reset)
+	LOG_PREFIX= go run ./cmd/overlens -config $(CURDIR)/overlens.conf -dev-data dev/company.json $(if $(RESET),--reset)
 
 # Every erm-test-* dir any test creates lands under $(TMPDIR) (Go's os.TempDir() resolves against it).
 # `make test` and `make t` each create their own scratch dir (erm-run-*), run under it via ERM_RUN_DIR,

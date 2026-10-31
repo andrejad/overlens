@@ -5,7 +5,7 @@ set -u
 cd "$(dirname "$0")"
 
 PIDFILE=.dev-servers.pid
-BACKEND_PORT=${ROADMAP_PORT:-8080}
+BACKEND_PORT=${OVERLENS_PORT:-8080}
 FRONTEND_PORT=5173
 
 port_pid() { ss -ltnp "sport = :$1" | grep -o 'pid=[0-9]*' | head -1 | cut -d= -f2; }

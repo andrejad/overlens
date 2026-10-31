@@ -1,7 +1,7 @@
 // Phase 7 company view in a real browser against the real server (REQ_FE_052-054, REQ_FE_091-097,
 // REQ_DEP_021/022, REQ_TEST_012/021, REQ_API_036/037, REQ_AUD_022/023). Every scene is built through the API
 // (builders.ts: random names, unique 2-4 letter tags, relative dates, no hardcoded ids). The test server runs without
-// the shipped sample company (start-server.sh: ROADMAP_SAMPLE_DATA=false, REQ_TEST_020), but the company views still show
+// the shipped sample company (start-server.sh: OVERLENS_SAMPLE_DATA=false, REQ_TEST_020), but the company views still show
 // every team that the OTHER specs created in the shared scratch database, so assertions are scoped to this test's own
 // teams/rows or derived from GET /api/company/roadmaps, never from a fixed count.
 //

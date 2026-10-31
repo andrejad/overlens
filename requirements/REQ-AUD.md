@@ -6,7 +6,7 @@
 - **REQ_AUD_002** — Each field that autosaves is its own entry, because the app saves each field as its own request (REQ_FE_026). When one request changes several fields, a team edit writes one entry per changed field and a deliverable edit writes one entry listing every changed field (REQ_API_027). Creating a deliverable is one entry.
 - **REQ_AUD_003** — Entries store the names involved (roadmap item, team, and both ends of a dependency) at the moment of the change, so they stay readable after things are renamed or deleted.
 - **REQ_AUD_016** — The audit table can be filtered by user, action, type, team, roadmap item name and date range, and downloaded as CSV with the same filters.
-- **REQ_AUD_008** — The admin Audit log card always shows this notice, word for word, next to a "Retention N days" badge showing the configured number: *"Set by `audit_retention_days` in `roadmap.conf` (default 365), not editable here. Older rows are removed automatically; nobody can delete entries by hand."*
+- **REQ_AUD_008** — The admin Audit log card always shows this notice, word for word, next to a "Retention N days" badge showing the configured number: *"Set by `audit_retention_days` in `overlens.conf` (default 365), not editable here. Older rows are removed automatically; nobody can delete entries by hand."*
 
 ## Audit writes
 
@@ -24,7 +24,7 @@
 
 - **REQ_AUD_009** — A backup runs every day inside the program at `backup_time` (default 04:00, server time). No cron job or Windows Task Scheduler entry is needed.
 - **REQ_AUD_010** — A backup is a consistent snapshot made with SQLite (`VACUUM INTO` or its backup API), written to a temporary file, flushed to disk, then renamed into place. It is never a plain copy of the live file.
-- **REQ_AUD_011** — Files are named `roadmap-YYYY-MM-DD.db` and go in `backup_dir` (default `./backups`, and never the database's own folder). A second run on the same day overwrites that day's file.
+- **REQ_AUD_011** — Files are named `overlens-YYYY-MM-DD.db` and go in `backup_dir` (default `./backups`, and never the database's own folder). A second run on the same day overwrites that day's file.
 - **REQ_AUD_012** — After a successful backup, everything older than the newest `backup_keep_days` (default 10) is deleted. A failed backup deletes nothing. Only files with exactly that name pattern are ever touched.
 - **REQ_AUD_013** — If the app was off at `backup_time`, it makes today's backup once when it next starts.
 - **REQ_AUD_014** — Each backup run writes an audit entry (`backup.create`, `backup.prune` or `backup.fail`) as the system user. Failures are logged without secrets.

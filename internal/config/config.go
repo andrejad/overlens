@@ -1,4 +1,4 @@
-// Package config loads roadmap.conf (spec section 9): `key: value` lines, `#` comments, environment
+// Package config loads overlens.conf (spec section 9): `key: value` lines, `#` comments, environment
 // overrides, and fail-fast validation that reports every problem at once.
 package config
 
@@ -31,7 +31,7 @@ type Config struct {
 	SessionTTLDays         int
 	BootstrapAdminUser     string
 	BootstrapAdminPassword string
-	// Environment is "production" (default) or "development"; `roadmap -dev-data` only runs in development.
+	// Environment is "production" (default) or "development"; `overlens -dev-data` only runs in development.
 	Environment string
 	// SampleData: create the sample company on the first start of an empty database (REQ_DEMO_005).
 	SampleData bool
@@ -43,7 +43,7 @@ type Config struct {
 
 var defaults = map[string]string{
 	"port":                 "8080",
-	"db_path":              "./data/roadmap-database.db",
+	"db_path":              "./data/overlens-database.db",
 	"log_dir":              "./logs",
 	"log_level":            "INFO",
 	"audit_retention_days": "365",
@@ -62,21 +62,45 @@ var required = []string{"bootstrap_admin_user", "bootstrap_admin_password"}
 
 var timeRe = regexp.MustCompile(`^([01][0-9]|2[0-3]):[0-5][0-9]$`)
 
-// EnvName is the environment variable that overrides a key, e.g. port -> ROADMAP_PORT.
-func EnvName(key string) string { return "ROADMAP_" + strings.ToUpper(key) }
+// EnvName is the environment variable that overrides a key, e.g. port -> OVERLENS_PORT.
+func EnvName(key string) string { return envPrefix + strings.ToUpper(key) }
+
+const (
+	envPrefix       = "OVERLENS_"
+	legacyEnvPrefix = "ROADMAP_"
+)
+
+// withLegacyEnv makes getenv also answer an OVERLENS_X name from the old ROADMAP_X variable (REQ_CFG_015). The new
+// name wins; a value found under the old name logs one warning per variable (the name only, never the value).
+func withLegacyEnv(getenv func(string) string) func(string) string {
+	warned := map[string]bool{}
+	return func(name string) string {
+		if v := getenv(name); v != "" || !strings.HasPrefix(name, envPrefix) {
+			return v
+		}
+		old := legacyEnvPrefix + strings.TrimPrefix(name, envPrefix)
+		v := getenv(old)
+		if v != "" && !warned[old] {
+			warned[old] = true
+			slog.Warn("config: deprecated environment variable; rename it", "old", old, "new", name)
+		}
+		return v
+	}
+}
 
 // Load reads and validates the file at path. On failure the error lists every problem, and the
 // returned Config is nil. getenv is os.Getenv in production. Values of secrets are never put in errors.
 func Load(path string, getenv func(string) string) (*Config, error) {
+	getenv = withLegacyEnv(getenv)
 	vals, problems := map[string]string{}, []string{}
 	f, err := os.Open(path)
 	var noFile string
 	switch {
 	case errors.Is(err, fs.ErrNotExist):
-		// REQ_DEPLOY_011: a missing file is fine when the ROADMAP_* variables carry the settings (the
+		// REQ_DEPLOY_011: a missing file is fine when the OVERLENS_* variables carry the settings (the
 		// container has no file). If the settings then turn out to be incomplete, it is reported below.
 		noFile = fmt.Sprintf("config file %q missing or unreadable", path)
-		slog.Debug("config: no config file, using ROADMAP_* variables and defaults", "path", path)
+		slog.Debug("config: no config file, using OVERLENS_* variables and defaults", "path", path)
 	case err != nil:
 		problems = append(problems, fmt.Sprintf("config file %q missing or unreadable", path))
 	default:
@@ -148,7 +172,6 @@ func Load(path string, getenv func(string) string) (*Config, error) {
 	}
 	dir := filepath.Dir(abs(path))
 	c.DBPath, c.LogDir, c.BackupDir = resolve(dir, c.DBPath), resolve(dir, c.LogDir), resolve(dir, c.BackupDir)
-	c.DBPath = legacyDBFallback(c.DBPath)
 	c.Port = num("port", 1, 65535)
 	c.AuditRetentionDays = num("audit_retention_days", 0, 36500)
 	c.BackupKeepDays = num("backup_keep_days", 1, 36500)
@@ -208,30 +231,6 @@ func Load(path string, getenv func(string) string) (*Config, error) {
 	return c, nil
 }
 
-// The database file was called roadmap.db until 2026-10-17 (REQ_CFG_012). Where the configured file is the new
-// name, is missing, and the old name sits beside it, the old file is used, so an upgrade never starts on an empty
-// database. Nothing is renamed or copied here.
-const (
-	dbFileName       = "roadmap-database.db"
-	legacyDBFileName = "roadmap.db"
-)
-
-func legacyDBFallback(dbPath string) string {
-	if filepath.Base(dbPath) != dbFileName {
-		return dbPath
-	}
-	legacy := filepath.Join(filepath.Dir(dbPath), legacyDBFileName)
-	if _, err := os.Stat(dbPath); err == nil {
-		return dbPath
-	}
-	if _, err := os.Stat(legacy); err != nil {
-		return dbPath
-	}
-	slog.Warn("config: using the old database file name; rename it to finish the upgrade (stop the program first)",
-		"using", legacy, "new_name", dbPath)
-	return legacy
-}
-
 // LogSummary logs the effective settings (never the password). Call it once logging is set up.
 func (c *Config) LogSummary(path string) {
 	slog.Info("config: loaded", "path", path, "port", c.Port, "db_path", c.DBPath, "log_dir", c.LogDir,
@@ -245,6 +244,7 @@ func (c *Config) LogSummary(path string) {
 // file's directory, so a config failure can still be logged where the operator looks. It returns ""
 // when the file cannot be read. It never validates anything else.
 func PeekLogDir(path string, getenv func(string) string) string {
+	getenv = withLegacyEnv(getenv)
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return ""

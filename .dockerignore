@@ -15,9 +15,9 @@ data
 logs
 backups
 overlens-data
-roadmap
-roadmap.exe
-roadmap.conf
+overlens
+overlens.exe
+overlens.conf
 *.db
 *.db-wal
 *.db-shm
