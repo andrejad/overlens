@@ -1,89 +1,44 @@
 # Overlens
 
-**The delivery and accountability map for engineering organizations.**
+**One page that shows who is accountable for which deliverable, by when, and who is waiting on whom.**
 
-The essence is simple: **one person is accountable for one deliverable**, with a date, dependencies, and a scope everyone can see. This is
-not another layer on top of Jira or your ticketing system, and connecting to one is not the point. The value is in simplicity and clarity about who is accountable for what.
+Overlens helps teams working together on complex projects stay transparent and accountable for their part of the work.
+Every team's deliverables, milestones and dependencies sit on one timeline, each with a date and one accountable owner.
+It is built on one simple rule: one deliverable has exactly one accountable person.
 
-The installation (on Windows, Mac, or Linux) doesn't require any dependencies, stores all data locally, and works without internet access. You can try it in five minutes on your laptop, and install it inside your company's VPN if you want to try with your teams: 
-([Installation](#installation)).
+What Overlens is not:
+- Not an aggregation layer on top of Jira or other tracking systems.
+- Not a task manager or a ticketing system.
+- Not a SaaS: it runs on your own server inside your company's network, and you own the data.
 
 ![The company view: every team's deliverables, milestones and dependencies on one timeline](docs/images/company-view.png)
 
-## An example of a problem that Overlens helps solve
-
-The company's most important initiative needs eight teams, from frontend and AI to platform and security. Each team plans in its
-own Jira project, in its own way. The frontend team is busy with a modernization and never planned for the initiative. The
-platform team learns what the others need only when someone is stuck, and drops its own work to unblock them. Security
-hears about it days before launch.
-
-Nobody saw the whole picture until the deadline was close and it was too late. The planning was thin: nobody knew who planned to work on what and when. Teams say they weren't told in time and that the priorities weren't clear. Dates between teams are assumed, not agreed. Scope is scattered across documents. When something slips, it's unclear who owned it.
-
 ## Who it's for
 
-Leaders and team leaders who want to plan and monitor how multiple teams contribute to high-level goals, without drowning in detail and low-level tickets. You don't manage tickets; you hold team leads and product managers accountable for what they committed to.
+Leaders who need to see progress towards company goals, and want everyone to see who is accountable for each step.
 
-Individual team objectives become unclear when they are scattered and broken down in smaller tickets. These details are essential for team members (engineers) to organize their work, but at the higher level what matters is an aggregate of their work (outcomes) towards company goals.
+Ticketing systems are built for tasks, not high-level objectives. When progress is reported and aggregated through hundreds of tasks and epics,
+ownership dissolves into detail and nobody owns the whole outcome. When something slips, teams blame each other for not
+being proactive or not sharing information about dependencies. Only 7% of executives say they can quickly see how their teams' work supports
+company goals ([Atlassian, 2025](https://www.atlassian.com/blog/focus/how-goals-support-strategic-priorities)).
 
-Transparency and accountability can get hidden inside a ticketing system, so Overlens is open (read-only) to the whole organization, no account needed: everyone sees the same priorities, what their
-team owes others, and what it's waiting for. It is meant to be installed inside your company's VPN: simple to deploy, and
-no SaaS to subscribe to.
+Portfolio suites such as [Jira Align](https://www.atlassian.com/software/jira/align) may address this, but they are large
+products tied to one vendor's ecosystem. Overlens stays at the level that matters to leadership: one deliverable, one
+accountable person, one date, visible to the whole organization without an account. Every team is free to organize their
+work as they see fit, but their commitments to each other and high-level goals come together in Overlens.
 
-It's also for leaders who would rather ask than search. Connect an AI assistant (via MCP) and ask Overlens in plain words how the work is
-progressing and where the risks are.
+## What you get
 
-## What is Overlens
+- **The whole portfolio on one page**, with status and risk at a glance.
+- **Dependencies you can see**: who waits on whom, and everything a deliverable depends on.
+- **Milestones for the meeting**: what leads to each one, who owns each part, what is late or at risk.
+- **Ask your AI assistant**: connect any MCP assistant and ask "What is late or at risk?" (read-only).
+- **Free and open source** (MIT).
 
-One page that shows who delivers what, by when, and who is waiting on whom. Teams keep working in Jira; this is where the
-commitments between teams become visible.
+## Where it runs
 
-![Milestones only: the chain that leads to one milestone, with its health line and the people accountable for each part](docs/images/milestones-view.png)
-
-- **Yours, inside your network.** A single program on your own server, with nothing else to install. Your roadmap stays
-  in the company unless you choose to connect an AI assistant. Free and open source (MIT).
-- **The whole portfolio on one page.** Every team's deliverables and milestones on one company timeline, with status and
-  risk at a glance.
-- **Dependencies you can see.** Arrows between teams show who waits on whom, and by when. Pick any deliverable and trace
-  everything it depends on.
-- **Milestones for the meeting.** Switch to milestones only, click one, and see everything that leads to it: who owns
-  each part, what is at risk or overdue, what has no owner and where the slack is thin.
-- **One accountable owner for every item.** Each deliverable and milestone has one team, one responsible person, a date and
-  its scope, all in one place.
-- **Ready for the boardroom.** The timeline drops cleanly into PowerPoint and other executive decks.
-- **Ask your AI assistant.** Connect Claude, or any other assistant that speaks MCP, and ask in plain words: "What is late
-  or at risk, and which teams does it hold up?" It reads the roadmap and never changes it, and every answer links back to
-  the page. On a server it stays off until your organisation switches it on; the trial download has it on.
-
-![Tracing one deliverable: its four prerequisites across two teams, everything unrelated hidden](docs/images/trace-dependencies.png)
-
-Anyone on the network can view the map without logging in. Logins go only to the leaders accountable for a delivery;
-engineers shape the roadmap through their product and engineering leads.
-
-## "Can't we do this in Jira?"
-
-You can build something like it, and many companies try. In practice it rarely holds up. Jira tracks tasks; a leader
-needs commitments: which team delivers what, by when, and who is waiting for it. Getting that from Jira means every ticket
-must carry the right links, dates, and statuses, so the leader's question becomes extra work for every engineer. The
-report looks automatic, but someone keeps it accurate by hand, and nobody owns the answer.
-
-Even Atlassian sells a separate product, [Jira Align](https://www.atlassian.com/software/jira/align), for portfolio
-visibility. Meanwhile, Atlassian reports that only 7% of executives say they can quickly see how each of their teams' work
-supports company goals.
-([Atlassian, State of Teams 2025](https://www.atlassian.com/blog/focus/how-goals-support-strategic-priorities))
-
-Overlens takes the other route: one deliverable, one accountable person, one date, on one page. Teams keep working in
-Jira; the commitments between teams live here.
-
-The cost of the alternative, in numbers:
-
-- 87% of knowledge workers say that, with everyone in execution mode, they lack the time or capacity to coordinate.
-  Atlassian estimates this fragmentation costs the Fortune 500 $161 billion a year.
-  ([Atlassian, State of Teams 2026](https://www.atlassian.com/blog/state-of-teams-2026))
-- AI makes coding faster, not coordination: 87% of developers say AI helps them ship faster, yet 72% feel the same or
-  more friction than before AI. Finding information is again their biggest source of friction, followed by meetings.
-  ([Atlassian, State of Developer Experience 2026](https://www.atlassian.com/blog/development/developer-experience-report-2026))
-- 31% of complex projects fail to deliver their intended benefits, more than twice the rate for projects overall.
-  ([PMI, Pulse of the Profession 2026](https://www.pmi.org/learning/thought-leadership/driving-success-in-complex-projects))
+One program, nothing else to install, no internet needed. It runs on any Linux or Windows server (VM, EC2, physical)
+and on a Mac. Try it on your laptop in five minutes: [Installation](#installation).
 
 ## Installation
 

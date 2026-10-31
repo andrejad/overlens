@@ -20,12 +20,13 @@ const WHOLE_FILE = new Set([
   'web/src/terminology.test.ts',
 ])
 // Single lines allowed: the toggle switch's groove (Toolbar.tsx and its CSS), the text "Jira epic", tests feeding an
-// unknown address kind to the trace route, and the README's plain-English "Jira tracks tasks" (REQ_OVR_010 allows it).
+// unknown address kind to the trace route, and the README's plain-English "tasks and epics" of ticketing systems (not our
+// bars, REQ_OVR_010).
 const ALLOWED_LINE: { file?: RegExp; line: RegExp }[] = [
   { file: /^web\/src\/components\/Toolbar\.tsx$/, line: /className="track"/ },
   { file: /^web\/src\/index\.css$/, line: /\.switch(\.on)? \.track\b/ },
   { line: /Jira epic/ },
-  { file: /^README\.md$/, line: /Jira tracks tasks/ },
+  { file: /^README\.md$/, line: /tasks and epics/ },
   { file: /^web\/(e2e\/12-milestone-dependencies\.spec|src\/lib\/companyView\.test)\.ts$/, line: /trace\/epic\// },
 ]
 
