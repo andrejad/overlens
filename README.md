@@ -23,13 +23,13 @@ Nobody saw the whole picture until the deadline was close and it was too late. T
 
 Leaders and team leaders who want to plan and monitor how multiple teams contribute to high-level goals, without drowning in detail and low-level tickets. You don't manage tickets; you hold team leads and product managers accountable for what they committed to.
 
-Individual team objectives become unclear when they are scattered and broken down in smaller tickets. That is useful for team members to organize their work, but at the higher level what matters is an aggregate of their work towards company goals.
+Individual team objectives become unclear when they are scattered and broken down in smaller tickets. These details are essential for team members (engineers) to organize their work, but at the higher level what matters is an aggregate of their work (outcomes) towards company goals.
 
 Transparency and accountability can get hidden inside a ticketing system, so Overlens is open (read-only) to the whole organization, no account needed: everyone sees the same priorities, what their
 team owes others, and what it's waiting for. It is meant to be installed inside your company's VPN: simple to deploy, and
 no SaaS to subscribe to.
 
-It's also for leaders who would rather ask than search. Connect an AI assistant and ask Overlens in plain words how the work is
+It's also for leaders who would rather ask than search. Connect an AI assistant (via MCP) and ask Overlens in plain words how the work is
 progressing and where the risks are.
 
 ## What is Overlens
