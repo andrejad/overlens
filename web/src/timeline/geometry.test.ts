@@ -3,12 +3,125 @@
 
 import { describe, expect, it } from 'vitest'
 import { dateToX, gridFor, gridWidth, localDay, midX, nextDay, pxPerDay, ZOOMS, type View } from './axis'
-import { DIAMOND, milestoneGeom } from './geometry'
+import { BAR_H, barName, DIAMOND, milestoneGeom, nameUnder, ROW_PITCH, tagWidth } from './geometry'
 
 const t = localDay(new Date())
 const grid = gridFor(t - 60, t + 300, t)
 const at = (zoom: (typeof ZOOMS)[number], width = 1000): View => ({ ...grid, px: pxPerDay(zoom, width) })
 const bar = (start: number, end: number) => ({ kind: 'deliverable' as const, start, end })
+
+describe('REQ_FE_140 REQ_FE_141 REQ_FE_142 how a name and icons share a bar', () => {
+  const measure = (text: string, px: number) => text.length * (px === 12.5 ? 7 : 6) // px a character: 7 normal, 6 small
+  const layout = (name: string, width: number, tag?: string, icons = 0) => barName(name, width, tag, icons, measure)
+  const roomTag = tagWidth('PRD') + 6
+  const ten = 'x'.repeat(10)
+
+  it('REQ_FE_140 one row at the normal size needs the name, the padding (22) and the border (3)', () => {
+    expect(layout(ten, 95)).toEqual({ mode: 'one', icons: 0 })
+    expect(layout(ten, 94).mode).not.toBe('one')
+  })
+
+  it('REQ_FE_140 a tag and icons share the row', () => {
+    expect(layout(ten, 95 + roomTag, 'PRD').mode).toBe('one')
+    expect(layout(ten, 94 + roomTag, 'PRD').mode).not.toBe('one')
+    expect(layout(ten, 95 + 33, undefined, 2)).toEqual({ mode: 'one', icons: 2 }) // 12 + 3 + 12 and a gap of 6
+  })
+
+  it('REQ_FE_140 a name that fits on two small rows, broken between words, goes there', () => {
+    expect(layout('Usage Dashboard', 25 + 54)).toEqual({ mode: 'two', icons: 0 }) // 9 letters is the longest word: 54 px
+  })
+
+  it('REQ_FE_141 a name whose word does not fit goes under the bar, whatever the bar\'s width: the room after the tag is what counts', () => {
+    expect(layout('Usage Dashboard', 25 + 53).mode).toBe('under')
+    expect(layout('Usage Dashboard', 25 + 53 + roomTag, 'PRD').mode).toBe('under') // over 100 px wide, but the tag takes its share
+    expect(layout('Usage Dashboard', 25 + 53).icons).toBe(0)
+  })
+
+  it('REQ_FE_141 a non-breaking space is no break between words', () => {
+    expect(layout('Usage\u00a0Dashboard', 25 + 55).mode).toBe('under')
+    expect(layout('Usage Dashboard', 25 + 55).mode).toBe('two')
+  })
+
+  it('REQ_FE_141 three rows\' worth of words does not fit on two', () => {
+    expect(layout('aaaa bbbb cccc', 25 + 30).mode).toBe('under') // 30 px holds one word a row
+    expect(layout('aaaa bbbb cccc', 25 + 54).mode).toBe('two') // "aaaa bbbb" / "cccc"
+  })
+
+  it('REQ_FE_141 with more than 60 px of room a long name stays inside, cut', () => {
+    expect(layout('x'.repeat(40), 25 + 60).mode).toBe('under')
+    expect(layout('x'.repeat(40), 25 + 61).mode).toBe('two')
+  })
+
+  it('REQ_FE_142 an icon that would stop the name from fitting is left out, last ones first; the rest stay whole', () => {
+    const name = 'Mobile Sign-in' // two rows need 42 px
+    expect(layout(name, 25 + 42 + 33, undefined, 2)).toEqual({ mode: 'two', icons: 2 })
+    expect(layout(name, 25 + 42 + 18, undefined, 2)).toEqual({ mode: 'two', icons: 1 })
+    expect(layout(name, 25 + 42, undefined, 2)).toEqual({ mode: 'two', icons: 0 })
+  })
+
+  it('REQ_FE_142 a long name cut inside keeps only the icons that leave it 60 px', () => {
+    const long = 'x'.repeat(80)
+    expect(layout(long, 25 + 200, undefined, 2)).toEqual({ mode: 'two', icons: 2 })
+    expect(layout(long, 25 + 70, undefined, 2)).toEqual({ mode: 'two', icons: 0 })
+  })
+
+  it('REQ_FE_142 REQ_FE_010 the name and whole icons never need more than the bar has', () => {
+    for (let width = 1; width < 300; width++) {
+      for (const tag of [undefined, 'PRD']) {
+        for (const name of ['Go', 'Usage Dashboard', 'Disaster Recovery Drills', 'x'.repeat(60)]) {
+          const { mode, icons } = barName(name, width, tag, 3, measure)
+          if (icons === 0) continue
+          expect(mode).not.toBe('under')
+          expect(icons * 15 + 3, `${name} on ${width}`).toBeLessThanOrEqual(width)
+        }
+      }
+    }
+  })
+})
+
+describe('REQ_FE_141 a name under its bar', () => {
+  it('REQ_FE_141 the gap holds the name, 12 px, above a badge from the row below reaching up 8 px', () => {
+    expect(ROW_PITCH - BAR_H).toBeGreaterThanOrEqual(12 + 8)
+  })
+
+  it('REQ_FE_141 it is centred under the bar, also when longer than the bar', () => {
+    // bar from 100 to 170 (centre 135), border 1.5
+    expect(nameUnder(100, 70, 0, 1000, 40)).toEqual({ left: 13.5, max: 40 })
+    expect(nameUnder(100, 70, 0, 1000, 200)).toEqual({ left: -66.5, max: 200 })
+  })
+
+  it('REQ_FE_141 where one side is too short it slides toward the other, whole', () => {
+    expect(nameUnder(100, 70, 90, 1000, 200)).toEqual({ left: -11.5, max: 200 })
+    expect(nameUnder(100, 70, 0, 180, 200)!.max).toBe(180)
+    expect(nameUnder(100, 70, 0, 190, 120)).toEqual({ left: -31.5, max: 120 })
+  })
+
+  it('REQ_FE_141 only what does not fit in the whole stretch is cut', () => {
+    expect(nameUnder(100, 70, 90, 190, 200)).toEqual({ left: -11.5, max: 100 })
+  })
+
+  it('REQ_FE_141 with too little room there is no name under the bar', () => {
+    expect(nameUnder(100, 70, 110, 138, 200)!.max).toBe(28)
+    expect(nameUnder(100, 70, 110, 137, 200)).toBeNull()
+  })
+
+  it('REQ_FE_141 REQ_FE_010 it never leaves its stretch and always spans its bar\'s centre', () => {
+    let seed = 7
+    const rnd = (n: number) => (seed = (seed * 16807) % 2147483647) % n
+    for (let i = 0; i < 500; i++) {
+      const [barLeft, barWidth] = [300 + rnd(100), 10 + rnd(120)]
+      const c = barLeft + barWidth / 2
+      const [lo, hi] = [c - rnd(200), c + rnd(200)]
+      const u = nameUnder(barLeft, barWidth, lo, hi, 20 + rnd(300))
+      if (!u) continue
+      const a = barLeft + u.left + (barWidth < 30 ? Math.min(1.5, barWidth / 2) : 1.5)
+      expect(a).toBeGreaterThanOrEqual(lo - 1e-6)
+      expect(a + u.max).toBeLessThanOrEqual(hi + 1e-6)
+      expect(a).toBeLessThanOrEqual(c + 1e-6)
+      expect(a + u.max).toBeGreaterThanOrEqual(c - 1e-6)
+    }
+  })
+})
 
 describe('REQ_FE_040 a milestone\'s name is centred under its diamond and its date sits to the right, both inside the free stretch', () => {
   it('REQ_FE_040 REQ_FE_042 in a free row a 22px diamond is centred on its day, with the name centred under it and the date beside it, at every zoom level and width', () => {

@@ -4,7 +4,7 @@
 
 import { dateToX, gridWidth, midX, nextDay, type Day, type View } from './axis'
 
-export const ROW_PITCH = 44 // one row, top to top
+export const ROW_PITCH = 52 // one row, top to top: the bar, a name under it (12), and a badge from the row below reaching up 8 (REQ_FE_141)
 export const BAR_H = 32
 export const BAND_PAD = 10 // above the first row and below the last
 export const MS_TOP = 5 // a milestone's offset inside its row: its diamond on the bars' centre line (r+5..r+27), its name under it (r+29..r+42)
@@ -88,4 +88,51 @@ export function tagFits(tag: string, width: number): boolean {
 }
 export function snugBelow(tag: string | undefined, width: number): number {
   return tag !== undefined && tagFits(tag, width) ? Math.max(30, tagWidth(tag) + 3 + BAR_PAD) : 30
+}
+
+// How a deliverable's name and icons share its bar (REQ_FE_140/141/142). `measure` gives a text's width at a size. What
+// shares the row with the name mirrors timeline.css: the tag if it fits, the icons (12px, 3px apart) and the 6px gaps. Tried
+// in turn: one row at the normal size with all icons; two rows of small letters, broken only between words, with as many
+// icons as allow it; under the bar when it leaves the name at most UNDER_ROOM; else two rows, cut. Icons are whole or gone.
+export const NAME_PX = 12.5
+export const SMALL_PX = 10.5
+const UNDER_ROOM = 60
+function fitsTwoRows(name: string, room: number, width: (s: string) => number): boolean {
+  let rows = 1
+  let row = ''
+  for (const word of name.trim().split(/ +/)) {
+    if (width(word) > room) return false
+    const next = row ? `${row} ${word}` : word
+    if (width(next) <= room) {
+      row = next
+    } else {
+      rows++
+      row = word
+    }
+  }
+  return rows <= 2
+}
+export function barName(name: string, width: number, tag: string | undefined, icons: number, measure: (s: string, px: number) => number): { mode: 'one' | 'two' | 'under'; icons: number } {
+  const pad = width < snugBelow(tag, width) ? 0 : BAR_PAD
+  const tagRoom = tag !== undefined && tagFits(tag, width) ? tagWidth(tag) + 6 : 0
+  const room = width - 2 * barBorder(width) - pad - tagRoom
+  const iconRoom = (n: number) => (n > 0 ? n * 15 + 3 : 0) // n * 12, (n - 1) * 3, and the gap of 6
+  if (measure(name, NAME_PX) <= room - iconRoom(icons)) return { mode: 'one', icons }
+  for (let k = icons; k >= 0; k--) {
+    if (fitsTwoRows(name, room - iconRoom(k), (s) => measure(s, SMALL_PX))) return { mode: 'two', icons: k }
+  }
+  if (room <= UNDER_ROOM) return { mode: 'under', icons: 0 }
+  let k = icons
+  while (k > 0 && room - iconRoom(k) < UNDER_ROOM) k--
+  return { mode: 'two', icons: k }
+}
+
+// A name that goes under its bar sits in the gap between rows, centred under the bar (REQ_FE_141), in the free stretch
+// lo..hi of that gap around the bar's centre. Where one side of the stretch is too short it slides toward the other, and
+// only what doesn't fit in the whole stretch is cut. `left` is from the bar's padding box. No room for a readable name: null.
+export function nameUnder(barLeft: number, barWidth: number, lo: number, hi: number, nameWidth: number): { left: number; max: number } | null {
+  const max = Math.min(nameWidth, hi - lo)
+  if (max < LABEL_MIN) return null
+  const x = Math.min(Math.max(barLeft + barWidth / 2 - max / 2, lo), hi - max)
+  return { left: x - barLeft - barBorder(barWidth), max }
 }

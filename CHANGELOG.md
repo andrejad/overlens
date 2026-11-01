@@ -5,6 +5,17 @@ All notable changes to Overlens are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.2.0] — 2026-11-01
+
+### Changed
+- A deliverable's name that doesn't fit on one row now shows in smaller letters on two rows inside its bar, so more of it can be read at the wider zoom levels.
+- On very short deliverables, a name that can't fit in the bar now shows in small letters under it, where there is room. The team tag and status badge stay in the bar; its icons move to the side panel only.
+- When running from source, `./start.sh` now serves the live app on `port` from `overlens.conf` (default 8080), the address the start-up message shows, instead of 5173. The backend moves behind it to the new `backend_port` setting (default 8081). Installed programs and containers are not affected.
+
+### Fixed
+- Short deliverables with a team tag no longer cram their name into the bar: it shows centred under the bar instead, with clear space below it. Rows are a little taller to make room.
+- Label icons on a bar are no longer cut off: an icon without room is left out, and all of them stay in the side panel.
+
 ## [1.1.0] — 2026-10-31
 
 ### Changed

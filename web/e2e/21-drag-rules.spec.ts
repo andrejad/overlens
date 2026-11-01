@@ -9,7 +9,7 @@ import { findOverlaps, measureScript, visibleBoxes } from './visibility'
 
 test.use({ viewport: { width: 1600, height: 1000 }, colorScheme: 'light' })
 
-const ROW_PITCH = 44 // timeline/geometry.ts: one row, top to top
+const ROW_PITCH = 52 // timeline/geometry.ts: one row, top to top
 const BAND_PAD = 10 // above the first row
 
 const main = (page: Page, d: DeliverableHandle) => page.locator(`.deliverable:not(.dup)[data-deliverable="${d.id}"]`)

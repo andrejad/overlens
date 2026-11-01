@@ -219,6 +219,109 @@ describe('Timeline DOM contract', () => {
     expect(host.querySelector('.past')).not.toBeNull()
   })
 
+  it('REQ_FE_140 a name that does not fit on one row goes small on two rows, with its full text kept; one that fits stays as it is', () => {
+    const r = newRoadmap(['Platform'])
+    const p = ws(r, 'Platform')
+    const narrow = addDeliverable(r, { start: t, end: t + 59, in: [[p, 0]], name: 'Disaster Recovery Drills' })
+    const wide = addDeliverable(r, { start: t + 70, end: t + 250, in: [[p, 0]], name: 'Disaster Recovery Drills' })
+    render({ roadmap: r })
+    const nameOf = (id: number) => host.querySelector<HTMLElement>(`.deliverable[data-deliverable="${id}"] .name`)!
+    expect(nameOf(narrow.id).className).toBe('name two')
+    expect(nameOf(narrow.id).textContent).toBe('Disaster Recovery Drills')
+    expect(nameOf(wide.id).className).toBe('name')
+    const css = readFileSync('src/timeline/timeline.css', 'utf8')
+    const rule = css.match(/\.deliverable \.name\.two\s*\{([^}]*)\}/)![1]
+    expect(rule).toMatch(/-webkit-line-clamp:\s*2/)
+    expect(rule).toMatch(/font-size:\s*10\.5px/)
+    expect(css.indexOf('.deliverable .name.two')).toBeLessThan(css.indexOf('.deliverable.tiny .name')) // or a tiny bar would show it
+  })
+
+  describe('REQ_FE_141 a name under its bar', () => {
+    const name = 'Disaster Recovery Drills'
+    const barOf = (id: number) => host.querySelector<HTMLElement>(`.deliverable[data-deliverable="${id}"]`)!
+    const nameOf = (id: number) => barOf(id).querySelector<HTMLElement>('.name')!
+    // where the name's box starts and ends on the grid; its width is the max, as jsdom has no layout
+    const span = (id: number) => {
+      const a = parseFloat(barOf(id).style.left) + 1.5 + parseFloat(nameOf(id).style.left)
+      return [a, a + parseFloat(nameOf(id).style.maxWidth)]
+    }
+    const centreOf = (id: number) => parseFloat(barOf(id).style.left) + parseFloat(barOf(id).style.width) / 2
+
+    it('REQ_FE_141 a name that does not fit goes under its bar with its full text, and the bar shows no icons', () => {
+      const r = newRoadmap(['Platform'])
+      const d = addDeliverable(r, { start: t, end: t + 13, in: [[ws(r, 'Platform'), 0]], name, icons: ['star'] })
+      render({ roadmap: r })
+      expect(nameOf(d.id).className).toBe('name under')
+      expect(nameOf(d.id).textContent).toBe(name)
+      expect(barOf(d.id).querySelector('.icons')).toBeNull()
+      const css = readFileSync('src/timeline/timeline.css', 'utf8')
+      expect(css).toMatch(/\.deliverable\.tiny \.name\.under[^{]*\{[^}]*display:\s*block/)
+    })
+
+    it('REQ_FE_141 a short name that fits small stays inside, and a bar with room is not affected', () => {
+      const r = newRoadmap(['Platform'])
+      const p = ws(r, 'Platform')
+      const short = addDeliverable(r, { start: t, end: t + 13, in: [[p, 0]], name: 'Go' })
+      const wide = addDeliverable(r, { start: t + 40, end: t + 99, in: [[p, 0]], name: 'A'.repeat(80) })
+      render({ roadmap: r })
+      expect(nameOf(short.id).classList.contains('under')).toBe(false)
+      expect(nameOf(wide.id).className).toBe('name two')
+    })
+
+    it('REQ_FE_141 it is centred under its bar, whatever starts in the row below', () => {
+      const r = newRoadmap(['Platform'])
+      const p = ws(r, 'Platform')
+      addDeliverable(r, { start: t - 90, end: t - 80, in: [[p, 0]], name: 'Keeps the grid to the left' }) // room to the left
+      const d = addDeliverable(r, { start: t, end: t + 13, in: [[p, 0]], name })
+      addDeliverable(r, { start: t + 5, end: t + 40, in: [[p, 1]] }) // its badge is right under the bar's middle
+      render({ roadmap: r })
+      const [a, z] = span(d.id)
+      expect(nameOf(d.id).className).toBe('name under')
+      expect(Math.abs((a + z) / 2 - centreOf(d.id))).toBeLessThanOrEqual(0.6) // max-width is rounded up
+    })
+
+    it('REQ_FE_141 REQ_FE_010 names under neighbouring bars share the gap and never overlap; with too little room a name stays inside', () => {
+      const r = newRoadmap(['Platform'])
+      const p = ws(r, 'Platform')
+      addDeliverable(r, { start: t - 90, end: t - 80, in: [[p, 0]], name: 'Keeps the grid to the left' })
+      const a = addDeliverable(r, { start: t, end: t + 13, in: [[p, 0]], name })
+      const b = addDeliverable(r, { start: t + 14, end: t + 27, in: [[p, 0]], name })
+      const c = addDeliverable(r, { start: t + 100, end: t + 102, in: [[p, 0]], name })
+      const e = addDeliverable(r, { start: t + 103, end: t + 105, in: [[p, 0]], name })
+      const f = addDeliverable(r, { start: t + 106, end: t + 108, in: [[p, 0]], name })
+      render({ roadmap: r })
+      expect(nameOf(a.id).className).toBe('name under')
+      expect(nameOf(b.id).className).toBe('name under')
+      expect(span(a.id)[1]).toBeLessThanOrEqual(span(b.id)[0])
+      expect(nameOf(c.id).className).toBe('name under')
+      expect(nameOf(e.id).className).toBe('name two') // between two names, on 3 days at Year
+      expect(nameOf(f.id).className).toBe('name under')
+    })
+
+    it('REQ_FE_141 REQ_FE_054 REQ_FE_042 the team tag and the status badge stay in the bar', () => {
+      const r = newRoadmap(['Platform'])
+      const d = addDeliverable(r, { start: t, end: t + 13, in: [[ws(r, 'Platform'), 0]], name })
+      render({ roadmap: r, teamTags: new Map([[d.id, 'ONB']]) })
+      expect(nameOf(d.id).className).toBe('name under')
+      expect(barOf(d.id).querySelector('.team-tag')!.textContent).toBe('ONB')
+      expect(barOf(d.id).querySelector('.st')).not.toBeNull()
+    })
+
+    it('REQ_FE_141 REQ_FE_010 it keeps clear of a milestone on either side in the row', () => {
+      const r = newRoadmap(['Platform'])
+      const p = ws(r, 'Platform')
+      const d = addDeliverable(r, { start: t, end: t + 13, in: [[p, 0]], name })
+      addMilestone(r, { day: t - 20, in: p, row: 0, name: 'Go' })
+      addMilestone(r, { day: t + 30, in: p, row: 0, name: 'Go', status: 'at_risk' })
+      render({ roadmap: r })
+      const [before, after] = [...host.querySelectorAll<HTMLElement>('.ms')].sort((x, y) => parseFloat(x.style.left) - parseFloat(y.style.left))
+      const [a, z] = span(d.id)
+      expect(nameOf(d.id).className).toBe('name under')
+      expect(a).toBeGreaterThan(parseFloat(before.style.left) + 22)
+      expect(z).toBeLessThanOrEqual(parseFloat(after.style.left) - 6)
+    })
+  })
+
   it('REQ_FE_067 REQ_FE_010 a long name renders as a truncatable .name span with the full name on hover and timeline.css clips it with an ellipsis; a bar too narrow for its padding is marked snug, and one too narrow for any content tiny', async () => {
     await step('a long name renders as a truncatable .name span, with the full name available on hover', () => {
       const r = newRoadmap(['Platform'])
@@ -263,6 +366,20 @@ describe('Timeline DOM contract', () => {
       expect(css).toMatch(/\.deliverable \.name\s*\{[^}]*text-overflow:\s*ellipsis/)
       expect(css).toMatch(/\.deliverable \.name\s*\{[^}]*white-space:\s*nowrap/)
     })
+  })
+
+  it('REQ_FE_142 icons are drawn whole or left out, and the name is what shrinks', () => {
+    const r = newRoadmap(['Platform'])
+    const p = ws(r, 'Platform')
+    const roomy = addDeliverable(r, { start: t, end: t + 99, in: [[p, 0]], name: 'Go', icons: ['star', 'warning'] })
+    const tight = addDeliverable(r, { start: t + 120, end: t + 149, in: [[p, 0]], name: 'Mobile Sign-in', icons: ['star', 'warning'] })
+    render({ roadmap: r })
+    const icons = (id: number) => host.querySelectorAll(`.deliverable[data-deliverable="${id}"] .ic`).length
+    expect(icons(roomy.id)).toBe(2)
+    expect(icons(tight.id)).toBe(0) // 30 days at Year: 56 px of room, and two rows of its name need them all
+    const css = readFileSync('src/timeline/timeline.css', 'utf8')
+    expect(css).toMatch(/\.deliverable \.icons\s*\{[^}]*flex:\s*none/)
+    expect(css).not.toMatch(/\.deliverable \.icons\s*\{[^}]*overflow:\s*hidden/)
   })
 
   it('REQ_FE_080 a deliverable shows each of its icons, each labelled on hover; unknown keys are skipped', () => {
@@ -371,6 +488,24 @@ describe('dragging with pointer events', () => {
       [ms.id, { date: isoOf(t + 25), workstream_id: m.id, row: 0 }],
       [ms.id, { workstream_id: m.id, row: 1 }],
     ])
+  })
+
+  it('REQ_FE_141 a bar being dragged to another row keeps its name inside until it is dropped', () => {
+    const r = newRoadmap(['Platform'])
+    const p = ws(r, 'Platform')
+    const d = addDeliverable(r, { start: t, end: t + 13, in: [[p, 0]], name: 'Disaster Recovery Drills' })
+    addDeliverable(r, { start: t + 40, end: t + 80, in: [[p, 1]] })
+    render({ roadmap: r, onPatchDeliverable: vi.fn() })
+    const el = host.querySelector<HTMLElement>(`.deliverable[data-deliverable="${d.id}"]`)!
+    const y0 = parseFloat(el.style.top) + 4
+    expect(el.querySelector('.name')!.className).toBe('name under')
+    fire(el, 'pointerdown', 500, y0)
+    fire(el, 'pointermove', 500, y0 + ROW_PITCH)
+    expect(host.querySelector(`.deliverable[data-deliverable="${d.id}"] .name`)!.className).toBe('name two')
+    fire(el, 'pointercancel', 500, y0)
+    act(() => {
+      el.dispatchEvent(new Event('lostpointercapture', { bubbles: true }))
+    })
   })
 
   it('REQ_FE_127 REQ_FE_014 an empty workstream has no band, label or drop slot: the drop below Platform lands in Mobile; a row appears when an item is put in its workstream and closes up when its last item leaves', async () => {

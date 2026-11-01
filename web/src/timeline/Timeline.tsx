@@ -14,12 +14,24 @@ import { ICONS } from '../lib/icons'
 import { refusalMessage } from '../lib/apiError'
 import { CAP_MESSAGE, dateToX, dayOf, fmtDay, fmtWd, gridFor, gridWidth, isoOf, localDay, monthCells, nextDay, pxPerDay, todayX, unionGrid, weekCells, weekLabelMode, xToDate, type Day, type Grid, type View, type Zoom } from './axis'
 import { capCheck, clampDrag, tighter, wallsFor, type Bounds, type DragMode } from './drag'
-import { BAND_PAD, BAR_H, DIAMOND, MS_TOP, RING_LABEL, RING_MIN, ROW_PITCH, bandHeight, barBox, milestoneGeom, rowTop, snugBelow, tagFits, tagWidth } from './geometry'
+import { BAND_PAD, BAR_H, DIAMOND, MS_TOP, RING_LABEL, RING_MIN, ROW_PITCH, bandHeight, barBox, barName, milestoneGeom, nameUnder, rowTop, snugBelow, tagFits, tagWidth, NAME_PX, SMALL_PX } from './geometry'
 import type { MergedView } from './company'
 import { depLimits, edgeEnds, itemKey, limitsForMode, routeArrow, type Box } from './deps'
 import { MilestoneMarker } from './MilestoneMarker'
 import { packRoadmap, slotFree, storedRowFor, type PackedItem, type WorkstreamLayout } from './pack'
 import './timeline.css'
+
+// A name's width in semibold at a size from timeline.css, measured because capitals and CJK are far wider than average
+// letters (REQ_FE_140). Without a canvas, as in jsdom, an estimate.
+const MS_NAME_PX = 11.5
+const UNDER_GAP = 2 // between a name under a bar and what's next to it in the gap
+let textCtx: CanvasRenderingContext2D | null | undefined
+function textWidth(text: string, px: number): number {
+  if (textCtx === undefined) textCtx = document.createElement('canvas').getContext('2d') ?? null
+  if (!textCtx) return (text.length * 7 * px) / NAME_PX
+  textCtx.font = `600 ${px}px ${getComputedStyle(document.body).fontFamily}`
+  return textCtx.measureText(text).width
+}
 
 export type SelectType = 'deliverable' | 'milestone'
 
@@ -526,6 +538,41 @@ export function Timeline({ roadmap, zoom, dupsOn, canEdit, icons = [], selected,
   const eff = (o: PackedItem) => (isPreview(o.kind, o.id) ? { ...o, start: preview!.s, end: preview!.e } : o)
   const tx = todayX(view, today)
   const pastW = Math.min(W, Math.max(0, tx ?? (today < view.start ? 0 : W)))
+  // REQ_FE_140/141/142: how a deliverable's name and icons share its bar, and the free stretch of the gap under the row
+  const nameOf = (o: PackedItem, width: number) => {
+    const d = byId.get(o.id)!
+    return barName(d.name, width, teamTags?.get(o.id), d.icons.filter((k) => k in ICONS).length, textWidth)
+  }
+  const geomIn = (m: PackedItem, row: PackedItem[]) =>
+    milestoneGeom(m.start, row.filter((o) => !(o.kind === 'milestone' && o.id === m.id)), view, msById.get(m.id)!.status === 'at_risk')
+  // The gap's stretch around a bar's centre: halfway to the next name under a bar on each side, and clear of milestones'
+  // names and at-risk outlines. A name inside a bar leaves the gap free, and the row below keeps out of it (ROW_PITCH).
+  const stretchUnder = (w: WorkstreamLayout, it: PackedItem) => {
+    const others = w.shown.filter((o) => o !== it && o.displayRow === it.displayRow).map(eff)
+    const row = [...others, eff(it)]
+    const self = eff(it)
+    const box = barBox(self.start, self.end, view)
+    const c = box.left + box.width / 2
+    let lo = 0
+    let hi = W
+    for (const o of others) {
+      const before = o.start < self.start
+      if (o.kind === 'deliverable') {
+        const other = barBox(o.start, o.end, view)
+        if (nameOf(o, other.width).mode !== 'under') continue
+        const mid = (c + other.left + other.width / 2) / 2
+        if (before) lo = Math.max(lo, mid + UNDER_GAP)
+        else hi = Math.min(hi, mid - UNDER_GAP)
+      } else {
+        const g = geomIn(o, row)
+        const dc = g.left + g.size / 2
+        const half = g.label ? Math.min(g.label.max, textWidth(msById.get(o.id)!.name, MS_NAME_PX)) / 2 : 0
+        if (before) lo = Math.max(lo, Math.max(dc + half, g.left + g.size + g.ring) + UNDER_GAP)
+        else hi = Math.min(hi, Math.min(dc - half, g.left - g.ring) - UNDER_GAP)
+      }
+    }
+    return { lo, hi }
+  }
 
   const items = bands.flatMap((b) =>
     b.w.shown.map((it) => {
@@ -573,6 +620,9 @@ export function Timeline({ roadmap, zoom, dupsOn, canEdit, icons = [], selected,
       const primaryName = layout.find((w) => w.ws.id === d.workstream_ids[0])?.ws.name
       const tag = teamTags?.get(it.id)
       const showTag = tag !== undefined && tagFits(tag, box.width)
+      const nm = nameOf(it, box.width)
+      const stretch = !lifted && nm.mode === 'under' ? stretchUnder(b.w, it) : null
+      const under = stretch && nameUnder(box.left, box.width, stretch.lo, stretch.hi, textWidth(d.name, SMALL_PX))
       const cls = ['deliverable', it.copy && 'dup', box.width < snugBelow(tag, box.width) && 'snug', box.width < 14 && 'tiny', sel && 'selected', isPreview('deliverable', it.id) && !it.copy && 'dragging', faded(itemKey('deliverable', it.id)) && 'faded'].filter(Boolean).join(' ')
       const top = lifted ? preview!.at!.top : rt
       if (!it.copy) {
@@ -609,12 +659,14 @@ export function Timeline({ roadmap, zoom, dupsOn, canEdit, icons = [], selected,
               <span className="cdot r" aria-label="Connect: this blocks…" title="This blocks…" {...dotProps('deliverable', it.id, 'right')} />
             </>
           )}
-          <span className="name">{d.name}</span>
-          {d.icons.length > 0 && (
+          {under
+            ? <span className="name under" style={{ left: under.left, maxWidth: Math.ceil(under.max) }}>{d.name}</span>
+            : <span className={nm.mode === 'one' ? 'name' : 'name two'}>{d.name}</span>}
+          {nm.icons > 0 && (
             // M1: hover label is the effective label (an admin relabel, REQ_FE_080, or the default).
-            // Keys outside the fixed set (possible in pre-Phase-4 data) are skipped.
+            // Keys outside the fixed set (possible in pre-Phase-4 data) are skipped; those without room are left out (REQ_FE_142).
             <span className="icons">
-              {d.icons.filter((k) => k in ICONS).map((k) => {
+              {d.icons.filter((k) => k in ICONS).slice(0, nm.icons).map((k) => {
                 const { Icon, defaultLabel } = ICONS[k]
                 const label = iconLabels.get(k) ?? defaultLabel
                 return (

@@ -1,15 +1,25 @@
 #!/usr/bin/env bash
-# Starts the development servers in this terminal: the Go backend (port 8080) and the Vite frontend
-# (port 5173). Ctrl+C (or ./stop.sh from another terminal) shuts both down gracefully.
+# Starts the development servers in this terminal: the Vite frontend on `port` (default 8080), the address
+# to open, and the Go backend behind it on `backend_port` (default 8081). Ctrl+C (or ./stop.sh from another
+# terminal) shuts both down gracefully.
 set -u
 cd "$(dirname "$0")"
 export PATH="$HOME/.local/go/bin:$HOME/go/bin:$PATH"
 
 PIDFILE=.dev-servers.pid
-BACKEND_PORT=${OVERLENS_PORT:-8080}
-FRONTEND_PORT=5173
+# Only for Vite and the checks below: the backend reads and validates the settings itself, and refuses bad ones.
+conf_port() { LC_ALL=C sed -n "s/^\xEF\xBB\xBF//;s/^[[:space:]]*$1[[:space:]]*:[[:space:]]*\([0-9]*\).*/\1/Ip" overlens.conf 2>/dev/null | tail -1; }
+FRONTEND_PORT=${OVERLENS_PORT:-${ROADMAP_PORT:-$(conf_port port)}}
+FRONTEND_PORT=${FRONTEND_PORT:-8080}
+BACKEND_PORT=${OVERLENS_BACKEND_PORT:-${ROADMAP_BACKEND_PORT:-$(conf_port backend_port)}}
+BACKEND_PORT=${BACKEND_PORT:-8081}
 
 port_busy() { ss -ltn "sport = :$1" | grep -q LISTEN; }
+
+if [ "$FRONTEND_PORT" = "$BACKEND_PORT" ]; then
+  echo "port and backend_port are both $FRONTEND_PORT; ./start.sh needs two different ports." >&2
+  exit 1
+fi
 
 if [ -f "$PIDFILE" ] && kill -0 "$(head -1 "$PIDFILE")" 2>/dev/null; then
   echo "start.sh is already running (pid $(head -1 "$PIDFILE")). Use ./stop.sh first." >&2
@@ -32,9 +42,9 @@ echo "[start] building backend..."
 go build -o "$BIN_DIR/overlens" ./cmd/overlens || { rm -rf "$BIN_DIR"; exit 1; }
 
 # LOG_PREFIX is cleared like in `make run`: the test prefix must not reach dev logs.
-(LOG_PREFIX= exec "$BIN_DIR/overlens" -config "$PWD/overlens.conf") > >(sed -u 's/^/[backend]  /') 2>&1 &
+(LOG_PREFIX= OVERLENS_BEHIND_VITE=1 exec "$BIN_DIR/overlens" -config "$PWD/overlens.conf") > >(sed -u 's/^/[backend]  /') 2>&1 &
 BACKEND_PID=$!
-(cd web && exec node_modules/.bin/vite) > >(sed -u 's/^/[frontend] /') 2>&1 &
+(cd web && OVERLENS_BACKEND_PORT=$BACKEND_PORT exec node_modules/.bin/vite --port "$FRONTEND_PORT" --strictPort) > >(sed -u 's/^/[frontend] /') 2>&1 &
 FRONTEND_PID=$!
 printf '%s\n%s\n%s\n' "$$" "$BACKEND_PID" "$FRONTEND_PID" > "$PIDFILE"
 
@@ -59,7 +69,7 @@ cleanup() {
 }
 trap 'cleanup; exit 0' INT TERM
 
-echo "[start] backend  http://localhost:$BACKEND_PORT   frontend http://localhost:$FRONTEND_PORT   (Ctrl+C to stop)"
+echo "[start] open http://localhost:$FRONTEND_PORT   (backend on port $BACKEND_PORT; Ctrl+C to stop)"
 wait -n "$BACKEND_PID" "$FRONTEND_PID"
 echo "[start] a server exited on its own; stopping the other one." >&2
 cleanup

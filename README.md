@@ -67,16 +67,16 @@ git clone https://github.com/andrejad/overlens.git && cd overlens
 export PATH="$HOME/.local/go/bin:$PATH"     # only if Go lives there
 cp overlens.conf.example overlens.conf        # then set bootstrap_admin_user and bootstrap_admin_password (no defaults)
 (cd web && npm install)                     # one time, about a minute
-./start.sh                                  # backend on 8080, Vite on 5173; Ctrl+C stops both
+./start.sh                                  # Vite on 8080, backend on 8081; Ctrl+C stops both
 ```
 
-Open `http://localhost:5173` and log in with the admin you put in `overlens.conf`. On the first start of an empty database
+Open `http://localhost:8080` and log in with the admin you put in `overlens.conf`. On the first start of an empty database
 the app creates a small sample company (five teams, three workstreams, twenty deliverables, five milestones), so you see
 something right away; `sample_data: false` in `overlens.conf` switches that off. Check the server with
 `curl localhost:8080/health`.
 
-`./start.sh` runs the Go backend (port 8080) and the Vite frontend (port 5173, proxying `/api` to the backend) together in
-one terminal; Ctrl+C stops both gracefully. `./stop.sh` does the same from another terminal (it uses the `.dev-servers.pid`
+`./start.sh` runs the Vite frontend (`port` in `overlens.conf`, default 8080, proxying `/api`, `/health` and `/mcp`) and the
+Go backend (`backend_port`, default 8081) together in one terminal; Ctrl+C stops both gracefully. `./stop.sh` does the same from another terminal (it uses the `.dev-servers.pid`
 file that `start.sh` writes, and falls back to whatever holds the two ports).
 
 Other ways to run it:

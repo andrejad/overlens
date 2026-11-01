@@ -19,7 +19,9 @@ import (
 
 // Config holds every setting. BootstrapAdminPassword must never be logged.
 type Config struct {
-	Port                   int
+	Port int
+	// BackendPort is where the server listens under start.sh, behind Vite on Port (REQ_CFG_017); otherwise unused.
+	BackendPort            int
 	DBPath                 string
 	LogDir                 string
 	LogLevel               string
@@ -43,6 +45,7 @@ type Config struct {
 
 var defaults = map[string]string{
 	"port":                 "8080",
+	"backend_port":         "8081",
 	"db_path":              "./data/overlens-database.db",
 	"log_dir":              "./logs",
 	"log_level":            "INFO",
@@ -173,6 +176,7 @@ func Load(path string, getenv func(string) string) (*Config, error) {
 	dir := filepath.Dir(abs(path))
 	c.DBPath, c.LogDir, c.BackupDir = resolve(dir, c.DBPath), resolve(dir, c.LogDir), resolve(dir, c.BackupDir)
 	c.Port = num("port", 1, 65535)
+	c.BackendPort = num("backend_port", 1, 65535)
 	c.AuditRetentionDays = num("audit_retention_days", 0, 36500)
 	c.BackupKeepDays = num("backup_keep_days", 1, 36500)
 	c.SessionTTLDays = num("session_ttl_days", 1, 36500)
@@ -233,7 +237,7 @@ func Load(path string, getenv func(string) string) (*Config, error) {
 
 // LogSummary logs the effective settings (never the password). Call it once logging is set up.
 func (c *Config) LogSummary(path string) {
-	slog.Info("config: loaded", "path", path, "port", c.Port, "db_path", c.DBPath, "log_dir", c.LogDir,
+	slog.Info("config: loaded", "path", path, "port", c.Port, "backend_port", c.BackendPort, "db_path", c.DBPath, "log_dir", c.LogDir,
 		"log_level", c.LogLevel, "audit_retention_days", c.AuditRetentionDays, "backup_enabled", c.BackupEnabled,
 		"backup_dir", c.BackupDir, "backup_time", c.BackupTime, "backup_keep_days", c.BackupKeepDays,
 		"session_ttl_days", c.SessionTTLDays, "bootstrap_admin_user", c.BootstrapAdminUser,

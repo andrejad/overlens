@@ -12,8 +12,11 @@ bootstrap_admin_user:
 bootstrap_admin_password:
 
 # --- Optional (defaults shown) ---
-# HTTP port.
+# The port of the address in your browser.
 port: 8080
+
+# Only for ./start.sh (development): where the Go backend listens, behind the frontend on `port`.
+backend_port: 8081
 
 # SQLite database file. Its folder is created if missing.
 db_path: ./data/overlens-database.db

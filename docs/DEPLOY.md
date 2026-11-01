@@ -39,7 +39,8 @@ them to the GitHub release.
 
 The program reads `overlens.conf` (see `overlens.conf.example`, every key is explained there). Any key can be set with an
 environment variable instead: `OVERLENS_` plus the key in capitals (`OVERLENS_PORT=9000`); the variable wins over the file.
-The container is configured only with variables. Changes need a restart.
+The container is configured only with variables. Changes need a restart. `port` is the only port a deployed program uses;
+`backend_port` is only for `./start.sh` in development.
 
 New keys with the Phase 8 release:
 

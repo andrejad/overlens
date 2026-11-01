@@ -5,8 +5,11 @@ set -u
 cd "$(dirname "$0")"
 
 PIDFILE=.dev-servers.pid
-BACKEND_PORT=${OVERLENS_PORT:-8080}
-FRONTEND_PORT=5173
+conf_port() { LC_ALL=C sed -n "s/^\xEF\xBB\xBF//;s/^[[:space:]]*$1[[:space:]]*:[[:space:]]*\([0-9]*\).*/\1/Ip" overlens.conf 2>/dev/null | tail -1; }
+FRONTEND_PORT=${OVERLENS_PORT:-${ROADMAP_PORT:-$(conf_port port)}}
+FRONTEND_PORT=${FRONTEND_PORT:-8080}
+BACKEND_PORT=${OVERLENS_BACKEND_PORT:-${ROADMAP_BACKEND_PORT:-$(conf_port backend_port)}}
+BACKEND_PORT=${BACKEND_PORT:-8081}
 
 port_pid() { ss -ltnp "sport = :$1" | grep -o 'pid=[0-9]*' | head -1 | cut -d= -f2; }
 

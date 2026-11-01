@@ -114,6 +114,58 @@ func Test_REQ_DEPLOY_017_start_ends_with_where_to_open_the_app(t *testing.T) {
 	}
 }
 
+// REQ_DEPLOY_017, REQ_CFG_017: under start.sh the server listens on backend_port and Vite holds port, and the message
+// still names port, the address to open.
+func Test_REQ_DEPLOY_017_REQ_CFG_017_behind_vite_message_shows_port(t *testing.T) {
+	restoreLogger(t)
+	dir := t.TempDir()
+	port, backend := pickFreePort(t), pickFreePort(t)
+	for backend == port {
+		backend = pickFreePort(t)
+	}
+	conf := filepath.Join(dir, "overlens.conf")
+	os.WriteFile(conf, []byte(fmt.Sprintf("bootstrap_admin_user: admin\nbootstrap_admin_password: s3cret-pass\nport: %d\nbackend_port: %d\nsample_data: false\n"+
+		"db_path: %s\nlog_dir: %s\nbackup_dir: %s\n", port, backend, filepath.Join(dir, "d", "r.db"), filepath.Join(dir, "logs"), filepath.Join(dir, "b"))), 0o600)
+
+	r, w, _ := os.Pipe()
+	old := os.Stdout
+	os.Stdout = w
+	var buf syncBuf
+	copied := make(chan struct{})
+	go func() { io.Copy(&buf, r); close(copied) }()
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan int, 1)
+	go func() { done <- run(ctx, conf, testEnv(map[string]string{"OVERLENS_BEHIND_VITE": "1"}), os.Stderr) }()
+	for i := 0; i < 200 && !strings.Contains(buf.String(), "Press Ctrl+C"); i++ {
+		time.Sleep(25 * time.Millisecond)
+	}
+	res, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/health", backend))
+	if err != nil {
+		t.Errorf("the server does not answer on backend_port: %v", err)
+	} else {
+		res.Body.Close()
+	}
+	if res, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/health", port)); err == nil {
+		res.Body.Close()
+		t.Error("the server also answers on port, which belongs to Vite")
+	}
+	cancel()
+	if code := <-done; code != 0 {
+		t.Errorf("run exited %d", code)
+	}
+	os.Stdout = old
+	w.Close()
+	<-copied
+	out := buf.String()
+	msg := strings.Index(out, "Overlens is running.")
+	if msg < 0 {
+		t.Fatalf("no start-up message:\n%s", out)
+	}
+	if !strings.Contains(out[msg:], fmt.Sprintf("http://localhost:%d ", port)) {
+		t.Errorf("the message does not name port %d:\n%s", port, out[msg:])
+	}
+}
+
 // syncBuf is a bytes.Buffer the copying goroutine writes while the test reads it.
 type syncBuf struct {
 	mu sync.Mutex

@@ -179,9 +179,15 @@ func run(ctx context.Context, confPath string, getenv func(string) string, stder
 	srv := newServer(r)
 	// Bind before logging "listening", so that line is only ever true (a failed bind — port in use,
 	// no permission — is reported as the startup error it is, not a false "listening").
-	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Port))
+	listenPort := cfg.Port
+	if getenv("OVERLENS_BEHIND_VITE") != "" {
+		// REQ_CFG_017: start.sh runs Vite on cfg.Port, which stays the address in the start-up message
+		listenPort = cfg.BackendPort
+		slog.Info("behind Vite: listening on backend_port", "backend_port", listenPort, "browser_port", cfg.Port)
+	}
+	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", listenPort))
 	if err != nil {
-		slog.Error("cannot bind to port", "port", cfg.Port, "err", err)
+		slog.Error("cannot bind to port", "port", listenPort, "err", err)
 		return 1
 	}
 	// The scheduler goroutine (backup, prune, audit purge) joins the same WaitGroup as the session
@@ -190,7 +196,7 @@ func run(ctx context.Context, confPath string, getenv func(string) string, stder
 	go func() { defer bg.Done(); bk.Run(bgCtx) }()
 	errc := make(chan error, 1)
 	go func() { errc <- srv.Serve(ln) }()
-	slog.Info("server listening", "port", cfg.Port)
+	slog.Info("server listening", "port", listenPort)
 
 wait:
 	for {

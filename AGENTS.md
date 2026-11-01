@@ -30,7 +30,7 @@ precisely what the app does.
 ## Build and test
 
 - Needs Go 1.27 and Node 22 with npm. `(cd web && npm install)` once.
-- `./start.sh` runs backend (8080) and frontend (5173) for development; `make build` makes the single `overlens` program.
+- `./start.sh` runs frontend (`port`, default 8080) and backend (`backend_port`, default 8081) for development; `make build` makes the single `overlens` program.
 - `make test` runs everything (Go, ESLint, Vitest, Playwright) and prints a PASS/FAIL line per layer. `make t AREA=fe`
   runs the tests of one requirement area. Run `make test` before calling a change done.
 - Tests build their own temporary database. Never point a test at a real database.

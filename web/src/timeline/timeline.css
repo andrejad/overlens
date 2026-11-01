@@ -43,11 +43,15 @@
 /* deliverables */
 .deliverable { position: absolute; height: 32px; border-radius: 9px; display: flex; align-items: center; gap: 6px; padding: 0 12px 0 10px; font-size: 12.5px; font-weight: 600; box-shadow: 0 1px 2px rgba(16, 24, 40, .16); border: 1.5px solid rgba(0, 0, 0, .16); background: var(--c); color: var(--fg); cursor: pointer; transition: box-shadow .15s; z-index: 2; user-select: none; touch-action: none; }
 .deliverable.snug { padding: 0; }
+/* a name that doesn't fit on one row (REQ_FE_140); before .tiny, which still hides it */
+.deliverable .name.two { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; white-space: normal; overflow-wrap: anywhere; font-size: 10.5px; line-height: 12px; }
+/* a name under its bar, in the gap between rows (REQ_FE_141) */
+.deliverable .name.under, .deliverable.tiny .name.under { position: absolute; top: calc(100% + 1.5px); display: block; font-size: 10.5px; line-height: 12px; color: var(--text); }
 .deliverable.tiny .st, .deliverable.tiny .name, .deliverable.tiny .icons, .deliverable.tiny .risk-strip { display: none; }
 .deliverable:hover { box-shadow: 0 3px 10px rgba(16, 24, 40, .22); z-index: 4; }
 .deliverable .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-/* icons shrink and clip inside the bar like the name, so they can never spill onto a neighbour */
-.deliverable .icons { display: inline-flex; gap: 3px; margin-left: auto; opacity: .92; min-width: 0; overflow: hidden; }
+/* icons are drawn whole; those without room aren't rendered (geometry.ts barName, REQ_FE_142), so the name is what shrinks */
+.deliverable .icons { display: inline-flex; flex: none; gap: 3px; margin-left: auto; opacity: .92; }
 .deliverable .icons .ic { display: inline-flex; flex: none; }
 .deliverable.dup .icons { opacity: .75; }
 .deliverable.dup { background: color-mix(in srgb, var(--c) 20%, var(--surface)); border: 1.5px dashed var(--c); color: var(--text); box-shadow: none; }

@@ -73,7 +73,7 @@ test('REQ_FE_080 renaming an icon label in the admin card shows the new label on
   const team = await createTeam(baseURL!)
   const roadmap = await teamRoadmap(baseURL!, team)
   const ws = await createWorkstream(baseURL!, roadmap)
-  const d = await createDeliverable(baseURL!, roadmap, [ws.id], isoDay(1), isoDay(30))
+  const d = await createDeliverable(baseURL!, roadmap, [ws.id], isoDay(1), isoDay(150)) // room for its icon beside its name (REQ_FE_142)
   const patched = await apiFetch(baseURL!, `/api/deliverables/${d.id}`, { method: 'PATCH', headers: json, body: JSON.stringify({ icons: ['star'] }) })
   expect(patched.status).toBe(200)
   const label = `E2E label ${rand()}`

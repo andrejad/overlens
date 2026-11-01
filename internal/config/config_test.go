@@ -60,6 +60,25 @@ func Test_REQ_CFG_003_defaults(t *testing.T) {
 
 }
 
+func Test_REQ_CFG_017_backend_port(t *testing.T) {
+	c, err := config.Load(write(t, req), noEnv)
+	if err != nil || c.BackendPort != 8081 {
+		t.Fatalf("default: %+v %v", c, err)
+	}
+	c, err = config.Load(write(t, req+"backend_port: 9091\n"), noEnv)
+	if err != nil || c.BackendPort != 9091 {
+		t.Fatalf("file value: %+v %v", c, err)
+	}
+	env := map[string]string{"OVERLENS_BACKEND_PORT": "9092"}
+	c, err = config.Load(write(t, req+"backend_port: 9091\n"), func(k string) string { return env[k] })
+	if err != nil || c.BackendPort != 9092 {
+		t.Fatalf("env override: %+v %v", c, err)
+	}
+	if _, err = config.Load(write(t, req+"backend_port: 70000\n"), noEnv); err == nil || !strings.Contains(err.Error(), "backend_port") {
+		t.Fatalf("out of range: %v", err)
+	}
+}
+
 func Test_REQ_CFG_001_format_comments_and_colons(t *testing.T) {
 	t.Run("bom and crlf", func(t *testing.T) {
 		body := "\ufeffbootstrap_admin_user: boss\r\nbootstrap_admin_password: s3cret\r\nport: 9091\r\n"
