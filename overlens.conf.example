@@ -25,7 +25,7 @@ db_path: ./data/overlens-database.db
 log_dir: ./logs
 
 # DEBUG, INFO, WARN or ERROR.
-log_level: INFO
+log_level: WARN
 
 # Audit rows older than this many days are removed once a day, right after that day's backup succeeded
 # (or at backup time when backups are off; a failed backup postpones it). 0 keeps them forever.

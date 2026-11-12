@@ -14,7 +14,8 @@ precisely what the app does.
 
 | Path | What |
 |---|---|
-| `README.md` | What the app is, screenshots, quick starts, run from source, tests |
+| `README.md` | What the app is, screenshots, quick starts, a five-line run from source |
+| `docs/DEVELOP.md` | Run from source in detail, every `make` command, the tests (seeds, areas, the test-database guard) |
 | `requirements/REQ-*.md` | What the app must do, one requirement per line with a permanent ID (`REQ_FE_010`); start at `requirements/README.md` |
 | `docs/DEPLOY.md` | Every way to run it: download, Linux (systemd), Windows, Docker / Compose / Portainer, CapRover, Kubernetes; configuration, backups, upgrades, the AI connection (MCP) |
 | `docs/API.md`, `docs/API-USAGE.md` | The HTTP endpoints, and examples to copy |
@@ -32,7 +33,8 @@ precisely what the app does.
 - Needs Go 1.27 and Node 22 with npm. `(cd web && npm install)` once.
 - `./start.sh` runs frontend (`port`, default 8080) and backend (`backend_port`, default 8081) for development; `make build` makes the single `overlens` program.
 - `make test` runs everything (Go, ESLint, Vitest, Playwright) and prints a PASS/FAIL line per layer. `make t AREA=fe`
-  runs the tests of one requirement area. Run `make test` before calling a change done.
+  runs the tests of one requirement area. Run `make test` before calling a change done. Details: `docs/DEVELOP.md`.
+  Each run also saves its output under `test-logs/` (git-ignored, newest 20 runs kept).
 - Tests build their own temporary database. Never point a test at a real database.
 
 ## Rules for changes
@@ -45,7 +47,8 @@ precisely what the app does.
 3. **Hard rules** (marked *Hard rule* in the requirements) are never traded away, for example: items in one row never
    overlap; rows are sticky; a dependent never starts before its prerequisite ends; a roadmap spans at most 3 years.
 4. **Never silently destroy roadmap data.** Deletes are explicit and confirmed. The only automatic deletions are the
-   audit-log retention purge, the pruning of old backups and expired login sessions.
+   audit-log retention purge, the pruning of old backups and expired login sessions (apart from the pruning of old
+   files in `test-logs/`, which is development tooling and never touches roadmap data).
 5. **Words.** The horizontal rows are **workstreams**, never "lane", "swimlane" or "track". The bars are
    **deliverables**, never "epics". A **roadmap item** is a deliverable or a milestone. A test enforces this across code
    and docs.

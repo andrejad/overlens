@@ -547,19 +547,22 @@ export function Timeline({ roadmap, zoom, dupsOn, canEdit, icons = [], selected,
     milestoneGeom(m.start, row.filter((o) => !(o.kind === 'milestone' && o.id === m.id)), view, msById.get(m.id)!.status === 'at_risk')
   // The gap's stretch around a bar's centre: halfway to the next name under a bar on each side, and clear of milestones'
   // names and at-risk outlines. A name inside a bar leaves the gap free, and the row below keeps out of it (ROW_PITCH).
+  // Decided left to right: a bar before this one reserves its half only if its own name really went under; one that
+  // found no room keeps its name inside and leaves the gap to the bars after it.
   const stretchUnder = (w: WorkstreamLayout, it: PackedItem) => {
-    const others = w.shown.filter((o) => o !== it && o.displayRow === it.displayRow).map(eff)
+    const near = w.shown.filter((o) => o !== it && o.displayRow === it.displayRow)
+    const others = near.map(eff)
     const row = [...others, eff(it)]
     const self = eff(it)
     const box = barBox(self.start, self.end, view)
     const c = box.left + box.width / 2
     let lo = 0
     let hi = W
-    for (const o of others) {
+    others.forEach((o, i) => {
       const before = o.start < self.start
       if (o.kind === 'deliverable') {
         const other = barBox(o.start, o.end, view)
-        if (nameOf(o, other.width).mode !== 'under') continue
+        if (nameOf(o, other.width).mode !== 'under' || (before && !underOf(w, near[i]))) return
         const mid = (c + other.left + other.width / 2) / 2
         if (before) lo = Math.max(lo, mid + UNDER_GAP)
         else hi = Math.min(hi, mid - UNDER_GAP)
@@ -570,8 +573,19 @@ export function Timeline({ roadmap, zoom, dupsOn, canEdit, icons = [], selected,
         if (before) lo = Math.max(lo, Math.max(dc + half, g.left + g.size + g.ring) + UNDER_GAP)
         else hi = Math.min(hi, Math.min(dc - half, g.left - g.ring) - UNDER_GAP)
       }
-    }
+    })
     return { lo, hi }
+  }
+  // Where a deliverable's name goes under its bar, or null when it stays inside; worked out once per bar and render.
+  const unders = new Map<PackedItem, { left: number; max: number } | null>()
+  const underOf = (w: WorkstreamLayout, it: PackedItem) => {
+    if (!unders.has(it)) {
+      const { start, end } = eff(it)
+      const box = barBox(start, end, view)
+      const { lo, hi } = stretchUnder(w, it)
+      unders.set(it, nameUnder(box.left, box.width, lo, hi, textWidth(byId.get(it.id)!.name, SMALL_PX)))
+    }
+    return unders.get(it)!
   }
 
   const items = bands.flatMap((b) =>
@@ -621,8 +635,7 @@ export function Timeline({ roadmap, zoom, dupsOn, canEdit, icons = [], selected,
       const tag = teamTags?.get(it.id)
       const showTag = tag !== undefined && tagFits(tag, box.width)
       const nm = nameOf(it, box.width)
-      const stretch = !lifted && nm.mode === 'under' ? stretchUnder(b.w, it) : null
-      const under = stretch && nameUnder(box.left, box.width, stretch.lo, stretch.hi, textWidth(d.name, SMALL_PX))
+      const under = !lifted && nm.mode === 'under' ? underOf(b.w, it) : null
       const cls = ['deliverable', it.copy && 'dup', box.width < snugBelow(tag, box.width) && 'snug', box.width < 14 && 'tiny', sel && 'selected', isPreview('deliverable', it.id) && !it.copy && 'dragging', faded(itemKey('deliverable', it.id)) && 'faded'].filter(Boolean).join(' ')
       const top = lifted ? preview!.at!.top : rt
       if (!it.copy) {

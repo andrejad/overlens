@@ -5,6 +5,14 @@ All notable changes to Overlens are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.2.1] — 2026-11-12
+
+### Changed
+- The README now shows Overlens in three steps (milestones, one milestone traced, the whole company view). Instructions for running from source and for the tests moved to `docs/DEVELOP.md`.
+
+### Fixed
+- On a row of very short deliverables, a name that stays inside its bar no longer takes room away from its neighbour's name under the bar, so more of those names are readable.
+
 ## [1.2.0] — 2026-11-01
 
 ### Changed

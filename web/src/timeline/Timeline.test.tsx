@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import type { RoadmapFull } from '../api/types'
-import { CAP_MESSAGE, fmtDay, fmtWd, isoOf, localDay, pxPerDay, ZOOMS } from './axis'
+import { CAP_MESSAGE, fmtDay, fmtWd, isoOf, localDay, monthStart, pxPerDay, ZOOMS } from './axis'
 import { DIAMOND, ROW_PITCH } from './geometry'
 import { Timeline, type TimelineProps } from './Timeline'
 import { addDependency, addDeliverable, addItemDependency, addMilestone, newRoadmap, ws } from './testkit'
@@ -283,12 +283,13 @@ describe('Timeline DOM contract', () => {
     it('REQ_FE_141 REQ_FE_010 names under neighbouring bars share the gap and never overlap; with too little room a name stays inside', () => {
       const r = newRoadmap(['Platform'])
       const p = ws(r, 'Platform')
-      addDeliverable(r, { start: t - 90, end: t - 80, in: [[p, 0]], name: 'Keeps the grid to the left' })
-      const a = addDeliverable(r, { start: t, end: t + 13, in: [[p, 0]], name })
-      const b = addDeliverable(r, { start: t + 14, end: t + 27, in: [[p, 0]], name })
-      const c = addDeliverable(r, { start: t + 100, end: t + 102, in: [[p, 0]], name })
-      const e = addDeliverable(r, { start: t + 103, end: t + 105, in: [[p, 0]], name })
-      const f = addDeliverable(r, { start: t + 106, end: t + 108, in: [[p, 0]], name })
+      const m0 = monthStart(t) // anchored to the month, so the room after the last bar does not depend on today's date
+      addDeliverable(r, { start: m0, end: m0 + 10, in: [[p, 0]], name: 'Keeps the grid to the left' })
+      const a = addDeliverable(r, { start: m0 + 30, end: m0 + 43, in: [[p, 0]], name })
+      const b = addDeliverable(r, { start: m0 + 44, end: m0 + 57, in: [[p, 0]], name })
+      const c = addDeliverable(r, { start: m0 + 95, end: m0 + 97, in: [[p, 0]], name })
+      const e = addDeliverable(r, { start: m0 + 98, end: m0 + 100, in: [[p, 0]], name })
+      const f = addDeliverable(r, { start: m0 + 101, end: m0 + 103, in: [[p, 0]], name })
       render({ roadmap: r })
       expect(nameOf(a.id).className).toBe('name under')
       expect(nameOf(b.id).className).toBe('name under')
@@ -296,6 +297,22 @@ describe('Timeline DOM contract', () => {
       expect(nameOf(c.id).className).toBe('name under')
       expect(nameOf(e.id).className).toBe('name two') // between two names, on 3 days at Year
       expect(nameOf(f.id).className).toBe('name under')
+    })
+
+    it('REQ_FE_141 REQ_FE_010 a squeezed first bar at the left edge keeps its name inside and leaves the gap to its right neighbour', () => {
+      const r = newRoadmap(['Platform'])
+      const p = ws(r, 'Platform')
+      const m0 = monthStart(t) // the grid starts here, so the first bar is at its left edge
+      const first = addDeliverable(r, { start: m0, end: m0 + 2, in: [[p, 0]], name })
+      const next = addDeliverable(r, { start: m0 + 3, end: m0 + 5, in: [[p, 0]], name }) // needs the gap under the first bar
+      const far = addDeliverable(r, { start: m0 + 22, end: m0 + 24, in: [[p, 0]], name })
+      addDeliverable(r, { start: m0 + 100, end: m0 + 130, in: [[p, 0]], name: 'Keeps the grid to the right' })
+      render({ roadmap: r })
+      expect(nameOf(first.id).className).toBe('name two')
+      expect(nameOf(next.id).className).toBe('name under')
+      expect(nameOf(far.id).className).toBe('name under')
+      expect(span(next.id)[0]).toBeGreaterThanOrEqual(0)
+      expect(span(next.id)[1]).toBeLessThanOrEqual(span(far.id)[0])
     })
 
     it('REQ_FE_141 REQ_FE_054 REQ_FE_042 the team tag and the status badge stay in the bar', () => {

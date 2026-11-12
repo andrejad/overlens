@@ -20,7 +20,7 @@ The app has to be easy for a company's IT to host and hard to break by accident.
 **Naming and safety**
 
 - **REQ_OVR_010** — The rows are called workstreams: "lane", "swimlane" and "track" are never used as a name for them in code, database, screens or docs (ordinary English uses of "track", e.g. "keeps track of", are fine). The bars are deliverables, never "epics" (naming a Jira epic as a link target is fine).
-- **REQ_OVR_011** — Nothing ever deletes or overwrites someone's roadmap data unless a person explicitly confirms it. The only automatic deletions are the old audit-log entries, the oldest daily backups and expired login sessions.
+- **REQ_OVR_011** — Nothing ever deletes or overwrites someone's roadmap data unless a person explicitly confirms it. The only automatic deletions are the old audit-log entries, the oldest daily backups and expired login sessions (the development tooling's pruning of old `test-logs/` files, REQ_TEST_023, never touches roadmap data).
 - **REQ_OVR_012** — Every rule the screens enforce (dates, cycles, the three-year limit, permissions) is enforced again by the server, so nothing can get around it by talking to the API directly.
 - **REQ_OVR_013** — The server limits how long it waits for a request's headers and body and for writing its answer, so a slow client can't hold a connection open.
 - **REQ_OVR_014** — *(2026-10-22, decision)* The application is called **Overlens**. The browser tab title, the documentation, the packaging descriptions and the name the AI connection gives itself (`overlens`, REQ_API_056) use it. *(Changed 2026-10-31: the file and service names follow the product name, REQ_CFG_015/016.)*

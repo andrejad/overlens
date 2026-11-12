@@ -1,6 +1,8 @@
 # Test entry points (REQ_TEST_001/002). Go tests use a fresh temp SQLite DB; nothing touches dev/prod data.
 export PATH := $(HOME)/.local/go/bin:$(HOME)/go/bin:$(PATH)
 export LOG_PREFIX := test
+# bash, not sh: the layer recipes read PIPESTATUS so that tee never hides a failing layer's exit code.
+SHELL := /bin/bash
 
 .PHONY: run build version release-files web-dist build-linux build-windows dev-data test test-all test-go test-web-deps test-lint test-unit test-e2e test-focus focus-run t test-clean clean-tmp
 
@@ -77,24 +79,39 @@ export TMPDIR := $(ERM_RUN_DIR)
 endif
 NEW_RUN_DIR = mktemp -d "$${TMPDIR:-/tmp}/erm-run-XXXXXX"
 
+# Test logs (REQ_TEST_023): `make test` / `make t` write each layer's full output and the summary to
+# test-logs/<YYYYMMDD-HHMMSS>-<layer>.log (go, lint, vitest, playwright, summary) in the repo root, still
+# printing to the terminal. Separate from the app's own logs. TEST_LOGBASE is the path prefix of one run;
+# unset (e.g. `make test-go` alone) nothing is written. Dev tooling only, not the app.
+# PRUNE_TEST_LOGS keeps the newest 20 runs: the one automatic deletion added, limited to files in
+# test-logs/ whose names match the pattern above — nothing else is ever touched.
+TEST_LOG_KEEP = 20
+NEW_LOG_BASE = mkdir -p "$(CURDIR)/test-logs" && echo "$(CURDIR)/test-logs/$$(date +%Y%m%d-%H%M%S)"
+PRUNE_TEST_LOGS = cd "$(CURDIR)/test-logs" 2>/dev/null && \
+	for s in $$(ls | grep -E '^[0-9]{8}-[0-9]{6}-(go|lint|vitest|playwright|summary)\.log$$' | cut -c1-15 | sort -ur | tail -n +$$(($(TEST_LOG_KEEP) + 1))); do \
+	  rm -f -- "$$s-go.log" "$$s-lint.log" "$$s-vitest.log" "$$s-playwright.log" "$$s-summary.log"; \
+	done; true
+TL = tl() { if [ -n "$$TEST_LOGBASE" ]; then tee "$$TEST_LOGBASE-$$1.log"; else cat; fi; };
+
 # `make test` is the one command: runs every layer regardless of an earlier one failing, prints a
 # per-layer summary, always cleans up afterwards (even when tests fail), and keeps the real exit code.
 test:
-	@d=$$($(NEW_RUN_DIR)) || exit 1; rc=0; ERM_RUN_DIR="$$d" $(MAKE) --no-print-directory test-all || rc=$$?; \
-	rm -rf "$$d"; $(MAKE) --no-print-directory clean-tmp; exit $$rc
+	@d=$$($(NEW_RUN_DIR)) || exit 1; lb=$$($(NEW_LOG_BASE)) || exit 1; rc=0; \
+	ERM_RUN_DIR="$$d" TEST_LOGBASE="$$lb" $(MAKE) --no-print-directory test-all || rc=$$?; \
+	rm -rf "$$d"; $(MAKE) --no-print-directory clean-tmp; $(PRUNE_TEST_LOGS); exit $$rc
 
 test-all:
-	@go_rc=0; lint_rc=0; unit_rc=0; e2e_rc=0; \
-	$(MAKE) --no-print-directory test-go || go_rc=$$?; \
-	$(MAKE) --no-print-directory test-lint || lint_rc=$$?; \
-	$(MAKE) --no-print-directory test-unit || unit_rc=$$?; \
-	$(MAKE) --no-print-directory test-e2e || e2e_rc=$$?; \
-	echo ""; \
+	@$(TL) go_rc=0; lint_rc=0; unit_rc=0; e2e_rc=0; \
+	$(MAKE) --no-print-directory test-go 2>&1 | tl go; go_rc=$${PIPESTATUS[0]}; \
+	$(MAKE) --no-print-directory test-lint 2>&1 | tl lint; lint_rc=$${PIPESTATUS[0]}; \
+	$(MAKE) --no-print-directory test-unit 2>&1 | tl vitest; unit_rc=$${PIPESTATUS[0]}; \
+	$(MAKE) --no-print-directory test-e2e 2>&1 | tl playwright; e2e_rc=$${PIPESTATUS[0]}; \
+	{ echo ""; \
 	echo "== make test summary =="; \
 	printf "  Go:         %s\n" "$$( [ $$go_rc -eq 0 ] && echo PASS || echo FAIL )"; \
 	printf "  ESLint:     %s\n" "$$( [ $$lint_rc -eq 0 ] && echo PASS || echo FAIL )"; \
 	printf "  Vitest:     %s\n" "$$( [ $$unit_rc -eq 0 ] && echo PASS || echo FAIL )"; \
-	printf "  Playwright: %s\n" "$$( [ $$e2e_rc -eq 0 ] && echo PASS || echo FAIL )"; \
+	printf "  Playwright: %s\n" "$$( [ $$e2e_rc -eq 0 ] && echo PASS || echo FAIL )"; } 2>&1 | tl summary; \
 	test $$go_rc -eq 0 -a $$lint_rc -eq 0 -a $$unit_rc -eq 0 -a $$e2e_rc -eq 0
 
 clean-tmp:
@@ -127,22 +144,23 @@ test-e2e: test-web-deps web-dist
 # failure — `go test -run` with no match is already a pass; Vitest/Playwright get `--passWithNoTests`.
 test-focus:
 	@test -n "$(AREA)" || (echo "usage: make t AREA=<area>"; exit 2)
-	@d=$$($(NEW_RUN_DIR)) || exit 1; rc=0; ERM_RUN_DIR="$$d" $(MAKE) --no-print-directory focus-run || rc=$$?; \
-	rm -rf "$$d"; $(MAKE) --no-print-directory clean-tmp; exit $$rc
+	@d=$$($(NEW_RUN_DIR)) || exit 1; lb=$$($(NEW_LOG_BASE)) || exit 1; rc=0; \
+	ERM_RUN_DIR="$$d" TEST_LOGBASE="$$lb" $(MAKE) --no-print-directory focus-run || rc=$$?; \
+	rm -rf "$$d"; $(MAKE) --no-print-directory clean-tmp; $(PRUNE_TEST_LOGS); exit $$rc
 
 # Runs every layer even if an earlier one fails, and fails if any layer failed.
 focus-run:
-	@area_upper=$$(echo "$(AREA)" | tr '[:lower:]' '[:upper:]'); go_rc=0; unit_rc=0; e2e_rc=0; \
-	echo "== Go: -run 'REQ_$${area_upper}_' =="; \
-	go test -count=1 ./... -run "REQ_$${area_upper}_" -v || go_rc=$$?; \
-	echo "== Vitest: -t 'REQ_$${area_upper}_' =="; \
-	(cd web && npx vitest run --passWithNoTests -t "REQ_$${area_upper}_") || unit_rc=$$?; \
-	echo "== Playwright: --grep 'REQ_$${area_upper}_' =="; \
-	(cd web && npx playwright test --grep "REQ_$${area_upper}_" --pass-with-no-tests --no-deps) || e2e_rc=$$?; \
-	echo ""; echo "== make t AREA=$(AREA) summary =="; \
+	@$(TL) area_upper=$$(echo "$(AREA)" | tr '[:lower:]' '[:upper:]'); go_rc=0; unit_rc=0; e2e_rc=0; \
+	{ echo "== Go: -run 'REQ_$${area_upper}_' =="; \
+	go test -count=1 ./... -run "REQ_$${area_upper}_" -v 2>&1; } | tl go; go_rc=$${PIPESTATUS[0]}; \
+	{ echo "== Vitest: -t 'REQ_$${area_upper}_' =="; \
+	(cd web && npx vitest run --passWithNoTests -t "REQ_$${area_upper}_") 2>&1; } | tl vitest; unit_rc=$${PIPESTATUS[0]}; \
+	{ echo "== Playwright: --grep 'REQ_$${area_upper}_' =="; \
+	(cd web && npx playwright test --grep "REQ_$${area_upper}_" --pass-with-no-tests --no-deps) 2>&1; } | tl playwright; e2e_rc=$${PIPESTATUS[0]}; \
+	{ echo ""; echo "== make t AREA=$(AREA) summary =="; \
 	printf "  Go:         %s\n" "$$( [ $$go_rc -eq 0 ] && echo PASS || echo FAIL )"; \
 	printf "  Vitest:     %s\n" "$$( [ $$unit_rc -eq 0 ] && echo PASS || echo FAIL )"; \
-	printf "  Playwright: %s\n" "$$( [ $$e2e_rc -eq 0 ] && echo PASS || echo FAIL )"; \
+	printf "  Playwright: %s\n" "$$( [ $$e2e_rc -eq 0 ] && echo PASS || echo FAIL )"; } | tl summary; \
 	test $$go_rc -eq 0 -a $$unit_rc -eq 0 -a $$e2e_rc -eq 0
 
 # `make t AREA=aud` is shorthand for test-focus.
