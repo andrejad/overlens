@@ -5,6 +5,12 @@ All notable changes to Overlens are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.2.2] — 2026-11-14
+
+### Changed
+- The company page heading and the short form of the first top-bar button (narrow windows) now read "Milestones and deliverables"; the short form of the second button reads "Teams roadmaps".
+- The README screenshots were retaken.
+
 ## [1.2.1] — 2026-11-12
 
 ### Changed

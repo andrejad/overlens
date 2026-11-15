@@ -86,7 +86,7 @@ export function TopBar({ variant = 'minimal', teamName, left, right }: { variant
       >
         <Layers size={16} aria-hidden="true" />
         <span className="hidden min-[1440px]:inline">See workstreams (all teams)</span>
-        <span className="min-[1440px]:hidden">All roadmaps</span>
+        <span className="min-[1440px]:hidden">Milestones and deliverables</span>
       </a>
       <a
         href="#/teams"
@@ -98,7 +98,7 @@ export function TopBar({ variant = 'minimal', teamName, left, right }: { variant
       >
         <Users size={16} aria-hidden="true" />
         <span className="hidden min-[1440px]:inline">Teams roadmaps</span>
-        <span className="min-[1440px]:hidden">Team roadmaps</span>
+        <span className="min-[1440px]:hidden">Teams roadmaps</span>
       </a>
       {!minimal && <span className="sep" />}
       {left}

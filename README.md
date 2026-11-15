@@ -69,7 +69,7 @@ You can also try it on your own computer first, in five minutes. Read the [Insta
 in your browser. It starts with a sample company, so you can look around straight away; to edit, log in as `admin` with
 the password `admin` and change the password.
 
-> **macOS:** version 1.0.0 has not been tested on a Mac yet. The macOS downloads are built the same way as the others and
+> **macOS:** the macOS downloads have not been tested on a Mac yet. They are built the same way as the others and
 > should work; if you try one, please tell us how it went in an [issue](https://github.com/andrejad/overlens/issues).
 
 **On a company server, inside your VPN.** When you want your teams to see it, put the same program on a Linux or Windows

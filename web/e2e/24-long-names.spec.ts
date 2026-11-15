@@ -68,20 +68,22 @@ test('REQ_FE_141 REQ_FE_010 names under narrow bars sit in the gap and touch not
   const { team, roadmap, ws } = await createScene(url)
   const w = ws[0].id
   const row = (n: number) => ({ rows: { [w]: n } })
+  // anchored to the month start, not today: the grid ends at a month's end, and where the last bar falls in it decided whether its name could sit centred
+  const fromMonthStart = (n: number) => isoDay(n - (new Date().getDate() - 1))
   // row 0: a free name, one cut by the next, and one with a milestone after it
-  const free = await createDeliverable(url, roadmap, [w], isoDay(2), isoDay(15), { name: 'Disaster Recovery Drills And More', ...row(0) })
-  const cut = await createDeliverable(url, roadmap, [w], isoDay(90), isoDay(103), { name: 'Regional Failover Rehearsal', ...row(0) })
-  await createDeliverable(url, roadmap, [w], isoDay(116), isoDay(129), { name: 'Annual Compliance Review', ...row(0) }) // about 25 days on: room at any window width
-  await createDeliverable(url, roadmap, [w], isoDay(180), isoDay(193), { name: 'Password Reset Flow', ...row(0) })
-  await createMilestone(url, roadmap, w, isoDay(205), { name: 'Beta launch' })
+  const free = await createDeliverable(url, roadmap, [w], fromMonthStart(2), fromMonthStart(15), { name: 'Disaster Recovery Drills And More', ...row(0) })
+  const cut = await createDeliverable(url, roadmap, [w], fromMonthStart(90), fromMonthStart(103), { name: 'Regional Failover Rehearsal', ...row(0) })
+  await createDeliverable(url, roadmap, [w], fromMonthStart(116), fromMonthStart(129), { name: 'Annual Compliance Review', ...row(0) }) // about 25 days on: room at any window width
+  await createDeliverable(url, roadmap, [w], fromMonthStart(180), fromMonthStart(193), { name: 'Password Reset Flow', ...row(0) })
+  await createMilestone(url, roadmap, w, fromMonthStart(205), { name: 'Beta launch' })
   // alone in the row, with free gap on both sides: its name has no reason not to be exactly centred
-  const lone = await createDeliverable(url, roadmap, [w], isoDay(330), isoDay(343), { name: 'Login Audit', ...row(0) })
+  const lone = await createDeliverable(url, roadmap, [w], fromMonthStart(330), fromMonthStart(343), { name: 'Login Audit', ...row(0) })
   // row 1: a bar right under `free`, whose badge stays clear of that name
-  await createDeliverable(url, roadmap, [w], isoDay(2), isoDay(60), { name: 'Under the first', ...row(1) })
+  await createDeliverable(url, roadmap, [w], fromMonthStart(2), fromMonthStart(60), { name: 'Under the first', ...row(1) })
   // a very short bar right before another, with a bar under it: its name must not land on the next bar's name
-  await createDeliverable(url, roadmap, [w], isoDay(240), isoDay(244), { name: 'Hotfix Window Rehearsal', ...row(0) })
-  await createDeliverable(url, roadmap, [w], isoDay(245), isoDay(258), { name: 'Release Freeze Rehearsal', ...row(0) })
-  await createDeliverable(url, roadmap, [w], isoDay(240), isoDay(300), { name: 'Under the pair', ...row(1) })
+  await createDeliverable(url, roadmap, [w], fromMonthStart(240), fromMonthStart(244), { name: 'Hotfix Window Rehearsal', ...row(0) })
+  await createDeliverable(url, roadmap, [w], fromMonthStart(245), fromMonthStart(258), { name: 'Release Freeze Rehearsal', ...row(0) })
+  await createDeliverable(url, roadmap, [w], fromMonthStart(240), fromMonthStart(300), { name: 'Under the pair', ...row(1) })
 
   const check = async () => {
     await expect(page.locator(`.deliverable[data-deliverable="${free.id}"] .name.under`)).toBeVisible()

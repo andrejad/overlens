@@ -277,7 +277,7 @@ export function CompanyPage({ mode, traceId, traceKind = 'deliverable', mileston
       <div className="page-head flex items-center gap-4 p-4 flex-wrap">
         <div>
           <div className="eyebrow text-xs text-text-3">Company view</div>
-          <h1 className="text-2xl font-semibold">All roadmaps</h1>
+          <h1 className="text-2xl font-semibold">Milestones and deliverables</h1>
         </div>
         <span className="flex-1" />
         <div className="meta flex items-center gap-3 flex-wrap">
