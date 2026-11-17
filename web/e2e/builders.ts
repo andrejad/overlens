@@ -7,6 +7,8 @@
 // ERM_E2E_ADMIN_COOKIE (so no worker ever logs in again); `adminSession()` falls back to logging in itself.
 
 import { join } from 'node:path'
+import type { BrowserContext } from '@playwright/test'
+import { testToday } from '../src/testToday'
 
 // A logged-out browser state (no cookies) with the guided tour already marked as seen (REQ_FE_130); written by
 // global-setup.ts. Specs use it wherever they want an anonymous context, so the tour never opens over the page.
@@ -151,9 +153,10 @@ export async function createDeliverable(
 
 // ---- dependencies (Phase 5) ----
 
-// ISO date `offset` days from today (REQ_TEST_017: tests speak in relative days, never literal dates).
+// ISO date `offset` days from the frozen today (REQ_TEST_017: relative days, never literal dates; REQ_TEST_024: today is the
+// seed's day, never the real clock, so a run across midnight can't change an expected value).
 export function isoDay(offset: number): string {
-  const d = new Date()
+  const d = testToday(testSeed())
   d.setHours(12, 0, 0, 0) // noon: DST shifts can't move the calendar day
   d.setDate(d.getDate() + offset)
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -263,6 +266,11 @@ export function seededRandom(seed: number): () => number {
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296
   }
+}
+
+// REQ_TEST_024: the browser's clock is fixed at the seed's day; timers keep running. Every context a test uses is frozen.
+export async function freezeClock(ctx: BrowserContext): Promise<void> {
+  await ctx.clock.setFixedTime(testToday(testSeed()))
 }
 
 export function testSeed(): number {

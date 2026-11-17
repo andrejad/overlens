@@ -1,6 +1,7 @@
 // Improvements 11, REQ_FE_118 / REQ_FE_119: deleting a deliverable from the side panel and from the edit window, in a real
 // browser (Done, Escape and the focus return of the edit window are the Vitest tests). Runs in the `delete-deliverable-ui` project (logged in as e2e-admin).
-import { expect, test, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test } from './fixtures'
 import { apiFetch, createDependency, createDeliverable, createScene, isoDay } from './builders'
 
 // A deliverable in two workstreams (so it has a copy) with an arrow to a second deliverable; arrows switched on.

@@ -1,4 +1,4 @@
-import { readdirSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import config from '../playwright.config'
@@ -49,6 +49,25 @@ describe('REQ_TEST_012 core project ordering', () => {
     for (const f of specs) {
       const owners = projects.filter((p) => (p.testMatch === undefined || matches(p.testMatch, f)) && !matches(p.testIgnore, f)).map((p) => p.name)
       expect(owners, `${f} must be in exactly one Playwright project`).toHaveLength(1)
+    }
+  })
+})
+
+// REQ_TEST_024: every browser test sees the frozen "today". `test` comes from e2e/fixtures.ts (its context is
+// frozen), and a context a spec makes by hand is frozen right after it is made.
+describe('REQ_TEST_024 browser tests run on the frozen clock', () => {
+  const dir = join(__dirname, '..', 'e2e')
+  const files = readdirSync(dir).filter((f) => f.endsWith('.ts') && f !== 'fixtures.ts')
+
+  it('REQ_TEST_024 no e2e file imports test from @playwright/test, and every browser.newContext is followed by freezeClock on it', () => {
+    for (const f of files) {
+      const src = readFileSync(join(dir, f), 'utf8')
+      const imports = [...src.matchAll(/import\s*\{([^}]*)\}\s*from\s*'@playwright\/test'/g)].map((m) => m[1])
+      for (const names of imports) expect(names.split(',').map((n) => n.trim()), `${f} imports test from @playwright/test`).not.toContain('test')
+      for (const m of src.matchAll(/const\s+(\w+)\s*=\s*await\s+browser\.newContext\(/g)) {
+        expect(src, `${f}: ${m[1]} is not frozen`).toMatch(new RegExp(`freezeClock\\(${m[1]}\\)`))
+      }
+      expect((src.match(/browser\.newContext\(/g) ?? []).length, `${f}: a newContext not assigned to a const`).toBe((src.match(/const\s+\w+\s*=\s*await\s+browser\.newContext\(/g) ?? []).length)
     }
   })
 })

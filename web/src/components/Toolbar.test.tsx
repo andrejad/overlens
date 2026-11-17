@@ -4,7 +4,7 @@ import { AddButtons, DownloadCsvButton, Toolbar, ZoomRow } from './Toolbar'
 import { TopBar } from './AppChrome'
 import { CanEditProvider } from '../lib/canEdit'
 import * as prefs from '../lib/prefs'
-import { addDate, dayOf, fmtDay, localDay } from '../timeline/axis'
+import { dayOf, fmtDay } from '../timeline/axis'
 import type { Deliverable, Milestone, RoadmapFull } from '../api/types'
 import { step } from '../testSteps'
 
@@ -130,12 +130,46 @@ describe('M5 toolbar visible range', () => {
     })
   })
 
+  // Worked out with plain year/month arithmetic, not with axis.ts: the day `k` months from y-m-d (m 0-based), clamped to
+  // the last day of the target month, as the toolbar writes it ("28 Feb 2026").
+  const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  function shifted(y: number, m: number, d: number, k: number): string {
+    const ty = y + Math.floor((m + k) / 12)
+    const tm = (((m + k) % 12) + 12) % 12
+    return `${Math.min(d, new Date(Date.UTC(ty, tm + 1, 0)).getUTCDate())} ${MON[tm]} ${ty}`
+  }
+
   it('REQ_FE_061 an empty roadmap falls back to 3 months before today to 9 months after', () => {
     render(<Toolbar roadmap={roadmapWith([])} />)
-    const today = localDay(new Date())
-    expect(screen.getByText(fmtDay(addDate(today, 0, -3)))).toBeInTheDocument()
-    expect(screen.getByText(fmtDay(addDate(today, 0, 9)))).toBeInTheDocument()
+    const now = new Date()
+    const [y, m, d] = [now.getFullYear(), now.getMonth(), now.getDate()]
+    expect(screen.getByText(shifted(y, m, d, -3))).toBeInTheDocument()
+    expect(screen.getByText(shifted(y, m, d, 9))).toBeInTheDocument()
   })
+
+  // Month ends clamp to the target month's last day: 31 May - 3 months is 28 Feb, not "31 Feb" = 3 Mar.
+  for (const [y, m, d, start, end] of [
+    [2026, 4, 31, '28 Feb 2026', '28 Feb 2027'],
+    [2026, 6, 31, '30 Apr 2026', '30 Apr 2027'],
+    [2028, 1, 29, '29 Nov 2027', '29 Nov 2028'],
+    [2028, 4, 31, '29 Feb 2028', '28 Feb 2029'],
+    [2026, 11, 31, '30 Sep 2026', '30 Sep 2027'],
+    [2027, 0, 1, '1 Oct 2026', '1 Oct 2027'],
+    [2026, 10, 30, '30 Aug 2026', '30 Aug 2027'],
+  ] as const) {
+    it(`REQ_FE_061 on ${d} ${MON[m]} ${y} an empty roadmap shows ${start} to ${end}`, () => {
+      const saved = new Date()
+      vi.setSystemTime(new Date(y, m, d, 12))
+      try {
+        render(<Toolbar roadmap={roadmapWith([])} />)
+        expect(screen.getByText(start)).toBeInTheDocument()
+        expect(screen.getByText(end)).toBeInTheDocument()
+        expect([start, end]).toEqual([shifted(y, m, d, -3), shifted(y, m, d, 9)])
+      } finally {
+        vi.setSystemTime(saved)
+      }
+    })
+  }
 })
 
 describe('REQ_FE_084 the layout holds at 1280px; labels/date range collapse by breakpoint, nothing reflows', () => {

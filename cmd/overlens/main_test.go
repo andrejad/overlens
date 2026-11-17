@@ -164,7 +164,7 @@ func Test_REQ_CFG_008_console_copy_and_request_id(t *testing.T) {
 	l.Close()
 	conf := filepath.Join(dir, "overlens.conf")
 	os.WriteFile(conf, []byte(fmt.Sprintf("bootstrap_admin_user: a\nbootstrap_admin_password: b\nport: %d\n"+
-		"db_path: %s\nlog_dir: %s\nbackup_dir: %s\n", port, filepath.Join(dir, "data", "r.db"),
+		"db_path: %s\nlog_dir: %s\nbackup_dir: %s\nbackup_enabled: false\n", port, filepath.Join(dir, "data", "r.db"),
 		filepath.Join(dir, "logs"), filepath.Join(dir, "backups"))), 0o600)
 
 	origStdout := os.Stdout
@@ -244,7 +244,7 @@ func Test_REQ_API_019_health_and_graceful_shutdown(t *testing.T) {
 		conf := filepath.Join(dir, fmt.Sprintf("overlens-%d.conf", attempt))
 		logDir = filepath.Join(dir, fmt.Sprintf("logs-%d", attempt))
 		os.WriteFile(conf, []byte(fmt.Sprintf("bootstrap_admin_user: a\nbootstrap_admin_password: b\nport: %d\n"+
-			"db_path: %s\nlog_dir: %s\nbackup_dir: %s\n", port, filepath.Join(dir, fmt.Sprintf("data-%d", attempt), "r.db"),
+			"db_path: %s\nlog_dir: %s\nbackup_dir: %s\nbackup_enabled: false\n", port, filepath.Join(dir, fmt.Sprintf("data-%d", attempt), "r.db"),
 			logDir, filepath.Join(dir, fmt.Sprintf("backups-%d", attempt)))), 0o600)
 
 		ctx, cancel = context.WithCancel(context.Background())

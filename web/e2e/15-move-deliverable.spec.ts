@@ -1,6 +1,7 @@
 // Move a deliverable to another team (Improvements 10b, REQ_FE_021/030) against the REAL running app. Every scene is
 // built through the app's own API (builders.ts) and what was saved is read back from the server.
-import { expect, test, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test } from './fixtures'
 import { apiFetch, createDeliverable, createDependency, createScene, createWorkstream, isoDay, listDependencies } from './builders'
 
 test.use({ viewport: { width: 1600, height: 900 }, colorScheme: 'light' })

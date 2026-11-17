@@ -38,7 +38,7 @@ func (a *API) exportFile(w http.ResponseWriter, r *http.Request) (*store.Roadmap
 	if !ok {
 		return nil, time.Time{}, false
 	}
-	now := time.Now()
+	now := a.now()
 	f, err := store.ExportRoadmap(r.Context(), a.DB, id)
 	if err != nil {
 		fail(w, r, err)

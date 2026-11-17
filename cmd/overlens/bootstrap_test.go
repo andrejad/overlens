@@ -22,7 +22,7 @@ func startServer(t *testing.T, dir, user, pw string) (string, func() int) {
 		port := pickFreePort(t)
 		conf := filepath.Join(dir, fmt.Sprintf("overlens-%s-%d.conf", user, attempt))
 		os.WriteFile(conf, []byte(fmt.Sprintf("bootstrap_admin_user: %s\nbootstrap_admin_password: %s\nport: %d\n"+
-			"db_path: %s\nlog_dir: %s\nbackup_dir: %s\n", user, pw, port, filepath.Join(dir, "data", "r.db"),
+			"db_path: %s\nlog_dir: %s\nbackup_dir: %s\nbackup_enabled: false\n", user, pw, port, filepath.Join(dir, "data", "r.db"),
 			filepath.Join(dir, "logs"), filepath.Join(dir, "backups"))), 0o600)
 		ctx, cancel := context.WithCancel(context.Background())
 		done := make(chan int, 1)

@@ -3,9 +3,9 @@ import { cleanup, fireEvent, render, screen, waitFor, within, act } from '@testi
 import { CompanyPage } from './CompanyPage'
 import * as resources from '../api/resources'
 import { CanEditProvider } from '../lib/canEdit'
-import { companyFixture } from '../lib/companyFixtures'
+import { companyFixture, fixtureDay } from '../lib/companyFixtures'
 import { companyGrid } from '../timeline/company'
-import { localDay } from '../timeline/axis'
+import { dayOf, fmtDay, localDay } from '../timeline/axis'
 import type { CompanyTeam, CompanyTrace, Deliverable, Milestone } from '../api/types'
 import { step } from '../testSteps'
 
@@ -106,8 +106,8 @@ describe('REQ_FE_091 REQ_FE_052 the company view', () => {
     renderPage(<CompanyPage mode="workstreams" />)
     const g = companyGrid(companyFixture(), localDay(new Date()))
     expect(await screen.findByTestId('tl')).toHaveAttribute('data-grid', `${g.start}+${g.days}`)
-    expect(screen.getByTitle('Visible range')).toHaveTextContent('5 Jan 2026')
-    expect(screen.getByTitle('Visible range')).toHaveTextContent('27 Dec 2026')
+    expect(screen.getByTitle('Visible range')).toHaveTextContent(fmtDay(dayOf(fixtureDay(0))))
+    expect(screen.getByTitle('Visible range')).toHaveTextContent(fmtDay(dayOf(fixtureDay(356))))
   })
 
   it('REQ_FE_043 REQ_FE_042 the header pills count every team and the status legend is shown; on the trace the pills still count every team', async () => {

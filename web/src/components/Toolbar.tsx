@@ -5,7 +5,7 @@ import type { Zoom } from '../lib/prefs'
 import { useCanEdit } from '../lib/canEdit'
 import { resolveApiBaseURL } from '../api/base'
 import type { RoadmapFull } from '../api/types'
-import { addDate, dayOf, fmtDay, localDay, roadmapSpan, type Day } from '../timeline/axis'
+import { addMonths, dayOf, fmtDay, localDay, roadmapSpan, type Day } from '../timeline/axis'
 
 const baseURL = resolveApiBaseURL(import.meta.env.VITE_API_URL) // `??`, never `||` (REQ_FE_087)
 
@@ -28,7 +28,7 @@ function visibleRange(roadmap?: RoadmapFull): { start: Day; end: Day } {
   if (!span) {
     // REQ_FE_061: an empty roadmap shows a window from 3 months before today to 9 months after.
     const today = localDay(new Date())
-    return { start: addDate(today, 0, -3), end: addDate(today, 0, 9) }
+    return { start: addMonths(today, -3), end: addMonths(today, 9) }
   }
   return { start: span.min, end: span.max }
 }

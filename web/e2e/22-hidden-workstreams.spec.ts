@@ -1,7 +1,7 @@
 // REQ_FE_127 on the REAL running app: a workstream the roadmap has nothing in is not drawn, a workstream holding only
 // a copy stays drawn whether copies are on or off, and Manage workstreams still lists every workstream. Data comes
 // from the real API via builders.ts.
-import { expect, test } from '@playwright/test'
+import { expect, test } from './fixtures'
 import { createDeliverable, createScene, createWorkstream, isoDay } from './builders'
 
 test('REQ_FE_127 an empty workstream is not shown on the team roadmap; one holding only a copy stays with copies off; Manage workstreams lists all', async ({ page, baseURL }) => {

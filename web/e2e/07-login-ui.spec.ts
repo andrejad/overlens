@@ -4,7 +4,8 @@
 //
 // Lockout budget: failed logins are counted per connection address (every request here is 127.0.0.1) and
 // five lock the address for 15 minutes. This file makes exactly ONE wrong-password attempt (REQ_AUTH_005).
-import { expect, test, type BrowserContext, type Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
+import { expect, test } from './fixtures'
 import { apiFetch, createDeliverable, teamRoadmap, createTeam, createWorkstream, isoDay, ANON_STATE } from './builders'
 
 test.use({ viewport: { width: 1600, height: 900 }, colorScheme: 'light', storageState: ANON_STATE })

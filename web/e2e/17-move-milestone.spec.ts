@@ -1,7 +1,8 @@
 // Move a milestone to another team (REQ_FE_122) against the REAL running app. The scene is built through the app's own
 // API (builders.ts) and what was saved is read back from the server. "(move)" is located by role and name, and edit
 // mode is opened first when the panel has an Edit button, so the test holds whether or not the panel has an edit mode.
-import { expect, test, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test } from './fixtures'
 import { apiFetch, asItem, createDeliverable, createItemDependency, createMilestone, createScene, createWorkstream, getMilestoneDate, isoDay, listItemDependencies } from './builders'
 
 test.use({ viewport: { width: 1600, height: 900 }, colorScheme: 'light' })

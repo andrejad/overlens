@@ -1,6 +1,9 @@
 import { defineConfig } from '@playwright/test'
 import { ADMIN_STATE, ANON_STATE } from './e2e/builders'
 
+// REQ_TEST_024: the runner (isoDay, testToday) uses the same zone as the browser (timezoneId) and the server.
+process.env.TZ = 'Europe/Amsterdam'
+
 const port = Number(process.env.ERM_E2E_PORT ?? 8130)
 const baseURL = `http://127.0.0.1:${port}`
 
@@ -31,6 +34,7 @@ export default defineConfig({
   },
   use: {
     baseURL,
+    timezoneId: 'Europe/Amsterdam', // REQ_TEST_024
     storageState: ANON_STATE, // projects that log in override this with ADMIN_STATE
     ...(process.env.PW_CHROMIUM ? { launchOptions: { executablePath: process.env.PW_CHROMIUM } } : {}),
   },

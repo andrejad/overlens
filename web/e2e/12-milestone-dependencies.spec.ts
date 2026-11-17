@@ -7,7 +7,8 @@
 //   M  today+25               a milestone
 //   Q  today+40 .. today+55   a deliverable
 // "linked" means P -> M -> Q (M depends on P, Q depends on M).
-import { expect, test, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test } from './fixtures'
 import {
   apiFetch,
   asItem,

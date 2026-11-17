@@ -328,7 +328,7 @@ func Test_REQ_AUTH_008_REQ_DEPLOY_013_cookie_flags_and_only_the_hash_is_stored(t
 		t.Errorf("token is not 256-bit base64url: %v len %d", err, len(raw))
 	}
 	var id string
-	if err := g.DB.QueryRow(`SELECT id FROM sessions WHERE user_id = ? ORDER BY created_at DESC LIMIT 1`, g.admin.ID).Scan(&id); err != nil {
+	if err := g.DB.QueryRow(`SELECT id FROM sessions WHERE user_id = ? ORDER BY rowid DESC LIMIT 1`, g.admin.ID).Scan(&id); err != nil {
 		t.Fatal(err)
 	}
 	if n := countRows(g, `SELECT COUNT(*) FROM sessions WHERE id = ?`, c.Value); n != 0 {

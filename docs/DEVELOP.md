@@ -62,9 +62,14 @@ on. See `docs/DEPLOY.md`, "Connecting AI apps".
   An area with no matching test in a layer is a pass in that layer, not a failure. Areas are the
   lowercase requirement areas: `ovr`, `dat`, `api`, `fe`, `dep`, `auth`, `aud`, `cfg`, `test`, `demo`, `deploy`.
 - `make test-clean` — rarely needed; also drops the Go test cache.
-- `TEST_SEED=<n> make test-go` (or `TEST_SEED=<n> make t AREA=<area>`) replays a randomised test
-  exactly, including its dates — the test clock derives from the seed, never from real "today"; a
-  failing test prints its seed.
+- `TEST_SEED=<n> make test` (or `make test-go`, `make t AREA=<area>`) replays a randomised run
+  exactly, including its dates — no test reads the real "today". Go's test clock derives from the
+  seed; Vitest and the browser see a frozen "today" from the same seed (`web/src/testToday.ts`, a day
+  between 2020 and 2027). `make test` picks a seed when none is set and prints it in the summary; a
+  failing test prints its seed too. All layers run in `TZ=Europe/Amsterdam`.
+- A new Playwright spec imports `test` and `expect` from `./fixtures` (which freezes the browser
+  clock), and any context it makes with `browser.newContext` calls `freezeClock` from `builders.ts`;
+  a Vitest guard checks both.
 - Every `make test`/`make t` run gets its own scratch parent directory (`$TMPDIR`, cleaned up by
   `clean-tmp` at the end) so it never touches another worktree's or another concurrent run's live
   test database — only its own `erm-test-*` dirs are ever removed.

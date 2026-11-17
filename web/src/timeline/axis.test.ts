@@ -5,7 +5,7 @@ import {
 } from './axis'
 import { step } from '../testSteps'
 
-const today = localDay(new Date()) // tests run against the real clock, relative to it (REQ_TEST_017)
+const today = localDay(new Date()) // the run's frozen, seeded today (REQ_TEST_017/024)
 const WIDTH = 1000
 
 describe('REQ_FE_065 dateToX / xToDate', () => {
@@ -99,11 +99,40 @@ describe('REQ_FE_060/061/063 the grid', () => {
     expect(g.start + g.days - 1).toBe(monthEnd(today + 200))
   })
 
+  // Expected values are worked out here with plain year/month arithmetic, not with axis.ts: the first day of the month
+  // `k` months from year y, month m (0-based), and the last day of that month, as ISO dates.
+  function monthBounds(y: number, m: number, k: number): [string, string] {
+    const ty = y + Math.floor((m + k) / 12)
+    const tm = (((m + k) % 12) + 12) % 12
+    const mm = String(tm + 1).padStart(2, '0')
+    return [`${ty}-${mm}-01`, `${ty}-${mm}-${new Date(Date.UTC(ty, tm + 1, 0)).getUTCDate()}`]
+  }
+
   it('REQ_FE_061 an empty roadmap shows 3 months before today to 9 months after', () => {
-    const g = gridFor(null, null, today)
-    expect(g.start).toBe(monthStart(addDate(today, 0, -3)))
-    expect(g.start + g.days - 1).toBe(monthEnd(addDate(today, 0, 9)))
+    const now = new Date()
+    const g = gridFor(null, null, localDay(now))
+    expect(isoOf(g.start)).toBe(monthBounds(now.getFullYear(), now.getMonth(), -3)[0])
+    expect(isoOf(g.start + g.days - 1)).toBe(monthBounds(now.getFullYear(), now.getMonth(), 9)[1])
   })
+
+  // Month ends must not spill into the next month: 31 May - 3 months is February, not "31 Feb" = 3 Mar.
+  for (const [day, first, last] of [
+    ['2026-05-31', '2026-02-01', '2027-02-28'],
+    ['2026-07-31', '2026-04-01', '2027-04-30'],
+    ['2028-02-29', '2027-11-01', '2028-11-30'],
+    ['2028-05-31', '2028-02-01', '2029-02-28'],
+    ['2026-12-31', '2026-09-01', '2027-09-30'],
+    ['2027-01-01', '2026-10-01', '2027-10-31'],
+    ['2026-11-30', '2026-08-01', '2027-08-31'],
+  ]) {
+    it(`REQ_FE_061 on ${day} an empty roadmap's grid runs from ${first} to ${last}`, () => {
+      const [y, m, d] = day.split('-').map(Number)
+      const g = gridFor(null, null, localDay(new Date(y, m - 1, d, 12)))
+      expect(isoOf(g.start)).toBe(first)
+      expect(isoOf(g.start + g.days - 1)).toBe(last)
+      expect([first, last]).toEqual([monthBounds(y, m - 1, -3)[0], monthBounds(y, m - 1, 9)[1]])
+    })
+  }
 
   it('REQ_FE_063 a date past the end grows the grid to the end of that month', () => {
     const g = gridFor(today, today + 30, today)

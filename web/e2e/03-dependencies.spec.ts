@@ -5,7 +5,8 @@
 // Scene used by most tests, in one workstream (quarter zoom, so a ~3-month window fits on screen):
 //   P   today+0  .. today+14     the prerequisite
 //   Q   today+20 .. today+34     depends on P; the earliest day it may start is today+15
-import { expect, test, type Locator, type Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
+import { expect, test } from './fixtures'
 import {
   createDeliverable,
   createDependency,

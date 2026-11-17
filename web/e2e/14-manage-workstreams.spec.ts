@@ -2,7 +2,8 @@
 // reorder by dragging a grip with the real mouse that survives a reload of the roadmap, and the move-only delete
 // (REQ_FE_105, REQ_FE_106, REQ_FE_109). Scenes are built through the API (builders.ts).
 // Runs in the `manage-workstreams-ui` project (logged in as e2e-admin).
-import { expect, test, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test } from './fixtures'
 import { apiFetch, createDeliverable, createMilestone, createScene, isoDay } from './builders'
 
 test.use({ viewport: { width: 1600, height: 1000 }, colorScheme: 'light' })

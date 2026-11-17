@@ -27,7 +27,7 @@ func Test_REQ_DEPLOY_017_start_ends_with_where_to_open_the_app(t *testing.T) {
 	port := pickFreePort(t)
 	conf := filepath.Join(dir, "overlens.conf")
 	os.WriteFile(conf, []byte(fmt.Sprintf("bootstrap_admin_user: admin\nbootstrap_admin_password: s3cret-pass\nport: %d\nsample_data: false\n"+
-		"db_path: %s\nlog_dir: %s\nbackup_dir: %s\n", port, filepath.Join(dir, "d", "r.db"), filepath.Join(dir, "logs"), filepath.Join(dir, "b"))), 0o600)
+		"db_path: %s\nlog_dir: %s\nbackup_dir: %s\nbackup_enabled: false\n", port, filepath.Join(dir, "d", "r.db"), filepath.Join(dir, "logs"), filepath.Join(dir, "b"))), 0o600)
 
 	start := func() string {
 		t.Helper()
@@ -125,7 +125,7 @@ func Test_REQ_DEPLOY_017_REQ_CFG_017_behind_vite_message_shows_port(t *testing.T
 	}
 	conf := filepath.Join(dir, "overlens.conf")
 	os.WriteFile(conf, []byte(fmt.Sprintf("bootstrap_admin_user: admin\nbootstrap_admin_password: s3cret-pass\nport: %d\nbackend_port: %d\nsample_data: false\n"+
-		"db_path: %s\nlog_dir: %s\nbackup_dir: %s\n", port, backend, filepath.Join(dir, "d", "r.db"), filepath.Join(dir, "logs"), filepath.Join(dir, "b"))), 0o600)
+		"db_path: %s\nlog_dir: %s\nbackup_dir: %s\nbackup_enabled: false\n", port, backend, filepath.Join(dir, "d", "r.db"), filepath.Join(dir, "logs"), filepath.Join(dir, "b"))), 0o600)
 
 	r, w, _ := os.Pipe()
 	old := os.Stdout

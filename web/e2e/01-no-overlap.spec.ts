@@ -2,7 +2,8 @@
 // level, on seeded random data built through the API (REQ_TEST_018, TEST_SEED=<n> replays a run): the team roadmap, the
 // company view and the company trace. The frozen wireframe pages are history and are no longer loaded here.
 // (The trace's own checks - what it hides, its arrows - live in 09-company-views.spec.ts, not here.)
-import { expect, test, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test } from './fixtures'
 import { createCompany, createDeliverable, createDependency, createRandomCompany, createScene, isoDay, seededRandom, testSeed } from './builders'
 import { findOverlaps, measureScript } from './visibility'
 

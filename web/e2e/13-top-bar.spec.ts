@@ -2,7 +2,8 @@
 // out of a near milestone (REQ_FE_004, REQ_FE_066, REQ_FE_101, REQ_DEP_027). Every scene is built through the API (builders.ts,
 // random names and tags, days relative to today); only this test's own teams are asserted on.
 // Runs in the `top-bar-ui` project (logged in as e2e-admin).
-import { expect, test, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test } from './fixtures'
 import {
   asItem,
   createDeliverable,

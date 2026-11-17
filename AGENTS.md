@@ -36,6 +36,11 @@ precisely what the app does.
   runs the tests of one requirement area. Run `make test` before calling a change done. Details: `docs/DEVELOP.md`.
   Each run also saves its output under `test-logs/` (git-ignored, newest 20 runs kept).
 - Tests build their own temporary database. Never point a test at a real database.
+- Tests never depend on the real date, time of day or timezone. Every layer runs in `Europe/Amsterdam`; Vitest and
+  Playwright see a frozen "today" derived from the run's seed, and tests use days relative to that clock. `make test`
+  prints the seed it used; `TEST_SEED=<n> make test` replays the data and the calendar of every layer.
+- New Playwright specs import `test` and `expect` from `./fixtures` (not from `@playwright/test`), and call `freezeClock`
+  from `builders.ts` on any browser context they create themselves.
 
 ## Rules for changes
 

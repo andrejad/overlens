@@ -3,7 +3,6 @@ package testutil
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/andrejad/overlens/internal/auth"
 )
@@ -44,14 +43,14 @@ func (e *Env) Admin(o AdminOpts) Admin {
 	return Admin{ID: id, Username: o.Username, Password: o.Password}
 }
 
-// Session inserts a live session for a (a year from the real clock, because the server under test
-// reads the real clock unless a test injects one) and returns the cookie value to send as
+// Session inserts a live session for a (expiring in year 9999, so it is live under the real clock and
+// under any clock a test injects) and returns the cookie value to send as
 // "session=<value>". Only the temp database is ever touched.
 func (e *Env) Session(a Admin) string {
 	e.T.Helper()
 	token, id, err := auth.NewToken()
 	e.check(err)
-	exp := time.Now().UTC().Add(365 * 24 * time.Hour).Format("2006-01-02T15:04:05Z")
+	exp := "9999-12-31T23:59:59Z"
 	_, err = e.DB.ExecContext(context.Background(), `INSERT INTO sessions(id, user_id, expires_at) VALUES (?,?,?)`, id, a.ID, exp)
 	e.check(err)
 	return token

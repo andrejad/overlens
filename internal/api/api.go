@@ -54,7 +54,7 @@ type API struct {
 	// dbPath and logDir are what GET /api/admin/storage measures (REQ_API_053).
 	dbPath, logDir string
 
-	// now is the clock for "today" in the attention list (REQ_API_054); time.Now unless a test sets it.
+	// now is the clock for "today" in the attention list (REQ_API_054) and the date in CSV file names; time.Now unless a test sets it.
 	now func() time.Time
 
 	// mcpOn and version switch /mcp on and name the server in its handshake (REQ_API_056/057, REQ_CFG_013).

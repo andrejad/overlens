@@ -13,6 +13,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -72,7 +73,7 @@ func newRigWith(t *testing.T, mkAudit func(*sql.DB) api.Auditor, mkAuth func(*sq
 	if mkAudit != nil {
 		aud = mkAudit(env.DB)
 	}
-	var opts []api.Option
+	opts := []api.Option{api.WithClock(func() time.Time { return env.Clock.Day(0) })}
 	if mkAuth != nil {
 		opts = append(opts, api.WithAuth(mkAuth(env.DB)))
 	}

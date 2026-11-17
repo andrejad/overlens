@@ -163,7 +163,7 @@ func Test_REQ_IMP_006_REQ_IMP_002_REQ_DAT_019_REQ_DEMO_003_company_file_loads_wi
 		env := testutil.NewEnv(t)
 		bad := strings.Replace(fixtureCompany, `"status": "at_risk"`, `"status": "wild"`, 1)
 		f, _ := store.ParseCompanyFile([]byte(bad))
-		_, err := importCompany(env.DB, f, time.Now())
+		_, err := importCompany(env.DB, f, env.Clock.Now())
 		if err == nil || !strings.Contains(err.Error(), "teams[0].roadmap.deliverables[0].status") {
 			t.Fatalf("%v", err)
 		}
@@ -186,7 +186,7 @@ func Test_REQ_IMP_006_REQ_IMP_002_REQ_DAT_019_REQ_DEMO_003_company_file_loads_wi
 		if err != nil {
 			t.Fatal(err)
 		}
-		_, err = importCompany(env.DB, f, time.Now())
+		_, err = importCompany(env.DB, f, env.Clock.Now())
 		if err == nil || !strings.Contains(err.Error(), "teams[1].roadmap.dependencies[1]") {
 			t.Fatalf("%v", err)
 		}
@@ -272,6 +272,9 @@ func realFile(t *testing.T, rel string) []byte {
 	return b
 }
 
+// loadDay is the day loadedCompany loads files on; checkLayout derives its window from the same value.
+var loadDay = time.Date(2030, 3, 10, 0, 0, 0, 0, time.UTC)
+
 // loadedCompany loads a company file through the real importer into a fresh database and reads it back.
 func loadedCompany(t *testing.T, data []byte) (rms []store.RoadmapFull, res store.CompanyResult) {
 	t.Helper()
@@ -280,7 +283,7 @@ func loadedCompany(t *testing.T, data []byte) (rms []store.RoadmapFull, res stor
 	if err != nil {
 		t.Fatalf("not a valid company file: %v", err)
 	}
-	if res, err = importCompany(env.DB, f, time.Now()); err != nil {
+	if res, err = importCompany(env.DB, f, loadDay); err != nil {
 		t.Fatalf("the importer refuses the file: %v", err)
 	}
 	teams, _, _ := store.TeamsList(context.Background(), env.DB, 200, 0)
@@ -434,7 +437,7 @@ func Test_REQ_DEMO_019_sample_span_sprint_lengths_and_milestone_workstreams(t *t
 
 func checkLayout(t *testing.T, file string) {
 	rms, _ := loadedCompany(t, realFile(t, file))
-	today := time.Now().UTC().Truncate(24 * time.Hour)
+	today := loadDay
 	earliest, latest := today.AddDate(0, -3, -3), today.AddDate(0, 9, 3) // a few days of slack for month lengths
 	day := func(s string) time.Time {
 		d, err := time.Parse("2006-01-02", s)
@@ -515,7 +518,7 @@ func Test_REQ_IMP_006_company_teams_differing_by_non_ascii_case_stay_distinct(t 
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := importCompany(env.DB, f, time.Now()); err != nil {
+	if _, err := importCompany(env.DB, f, env.Clock.Now()); err != nil {
 		t.Fatal(err)
 	}
 	rows, err := env.DB.Query(`SELECT t.name, o.position FROM company_team_order o JOIN teams t ON t.id=o.team_id ORDER BY o.position`)

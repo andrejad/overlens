@@ -3,7 +3,8 @@
 // Measured with the visibility helpers (REQ_TEST_013), so a hidden or collapsed block never counts. Dates are
 // relative days (REQ_TEST_017); expected values are derived from what each test created.
 // Runs in the `drag-rules-ui` project (logged in as e2e-admin), after the core projects.
-import { expect, test, type Locator, type Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
+import { expect, test } from './fixtures'
 import { apiFetch, createDeliverable, createScene, getDeliverableDates, isoDay, type DeliverableHandle } from './builders'
 import { findOverlaps, measureScript, visibleBoxes } from './visibility'
 

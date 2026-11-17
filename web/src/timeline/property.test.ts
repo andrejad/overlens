@@ -1,5 +1,5 @@
 // REQ_TEST_018: the hard layout rules checked on randomly generated roadmaps from a seeded PRNG.
-// A failure names the seed; `TEST_SEED=<n> npx vitest run src/timeline/property.test.ts` replays it.
+// A failure names the seed; `TEST_SEED=<n> npx vitest run src/timeline/property.test.ts` replays the data and the calendar (REQ_TEST_024).
 
 import { describe, expect, it } from 'vitest'
 import type { RoadmapFull } from '../api/types'

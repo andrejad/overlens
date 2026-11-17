@@ -100,8 +100,14 @@ test:
 	ERM_RUN_DIR="$$d" TEST_LOGBASE="$$lb" $(MAKE) --no-print-directory test-all || rc=$$?; \
 	rm -rf "$$d"; $(MAKE) --no-print-directory clean-tmp; $(PRUNE_TEST_LOGS); exit $$rc
 
+# REQ_TEST_024: every layer runs in one timezone (Europe/Amsterdam: it has daylight saving and is not UTC) and on one
+# seed, which replays the data and the calendar of all four layers. A TEST_SEED you set is kept; otherwise one is picked
+# here and printed in the summary. The zone is set for the test targets only, never for run, build or dev-data.
+test test-all test-go test-unit test-e2e test-focus focus-run t: export TZ := Europe/Amsterdam
+SEED = TEST_SEED=$${TEST_SEED:-$$(date +%s)}; export TEST_SEED;
+
 test-all:
-	@$(TL) go_rc=0; lint_rc=0; unit_rc=0; e2e_rc=0; \
+	@$(TL) $(SEED) go_rc=0; lint_rc=0; unit_rc=0; e2e_rc=0; \
 	$(MAKE) --no-print-directory test-go 2>&1 | tl go; go_rc=$${PIPESTATUS[0]}; \
 	$(MAKE) --no-print-directory test-lint 2>&1 | tl lint; lint_rc=$${PIPESTATUS[0]}; \
 	$(MAKE) --no-print-directory test-unit 2>&1 | tl vitest; unit_rc=$${PIPESTATUS[0]}; \
@@ -111,7 +117,8 @@ test-all:
 	printf "  Go:         %s\n" "$$( [ $$go_rc -eq 0 ] && echo PASS || echo FAIL )"; \
 	printf "  ESLint:     %s\n" "$$( [ $$lint_rc -eq 0 ] && echo PASS || echo FAIL )"; \
 	printf "  Vitest:     %s\n" "$$( [ $$unit_rc -eq 0 ] && echo PASS || echo FAIL )"; \
-	printf "  Playwright: %s\n" "$$( [ $$e2e_rc -eq 0 ] && echo PASS || echo FAIL )"; } 2>&1 | tl summary; \
+	printf "  Playwright: %s\n" "$$( [ $$e2e_rc -eq 0 ] && echo PASS || echo FAIL )"; \
+	echo "  TEST_SEED=$$TEST_SEED (replay: TEST_SEED=$$TEST_SEED make test)"; } 2>&1 | tl summary; \
 	test $$go_rc -eq 0 -a $$lint_rc -eq 0 -a $$unit_rc -eq 0 -a $$e2e_rc -eq 0
 
 clean-tmp:
@@ -150,8 +157,8 @@ test-focus:
 
 # Runs every layer even if an earlier one fails, and fails if any layer failed.
 focus-run:
-	@$(TL) area_upper=$$(echo "$(AREA)" | tr '[:lower:]' '[:upper:]'); go_rc=0; unit_rc=0; e2e_rc=0; \
-	{ echo "== Go: -run 'REQ_$${area_upper}_' =="; \
+	@$(TL) $(SEED) area_upper=$$(echo "$(AREA)" | tr '[:lower:]' '[:upper:]'); go_rc=0; unit_rc=0; e2e_rc=0; \
+	{ echo "TEST_SEED=$$TEST_SEED"; echo "== Go: -run 'REQ_$${area_upper}_' =="; \
 	go test -count=1 ./... -run "REQ_$${area_upper}_" -v 2>&1; } | tl go; go_rc=$${PIPESTATUS[0]}; \
 	{ echo "== Vitest: -t 'REQ_$${area_upper}_' =="; \
 	(cd web && npx vitest run --passWithNoTests -t "REQ_$${area_upper}_") 2>&1; } | tl vitest; unit_rc=$${PIPESTATUS[0]}; \
@@ -160,7 +167,8 @@ focus-run:
 	{ echo ""; echo "== make t AREA=$(AREA) summary =="; \
 	printf "  Go:         %s\n" "$$( [ $$go_rc -eq 0 ] && echo PASS || echo FAIL )"; \
 	printf "  Vitest:     %s\n" "$$( [ $$unit_rc -eq 0 ] && echo PASS || echo FAIL )"; \
-	printf "  Playwright: %s\n" "$$( [ $$e2e_rc -eq 0 ] && echo PASS || echo FAIL )"; } | tl summary; \
+	printf "  Playwright: %s\n" "$$( [ $$e2e_rc -eq 0 ] && echo PASS || echo FAIL )"; \
+	echo "  TEST_SEED=$$TEST_SEED"; } | tl summary; \
 	test $$go_rc -eq 0 -a $$unit_rc -eq 0 -a $$e2e_rc -eq 0
 
 # `make t AREA=aud` is shorthand for test-focus.

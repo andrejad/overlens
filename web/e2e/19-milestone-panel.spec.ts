@@ -1,6 +1,7 @@
 // Improvements 11, REQ_FE_100: the milestone side panel's per-field autosave edit form
 // against the REAL running app. Runs in its own project (logged in as e2e-admin).
-import { expect, test, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test } from './fixtures'
 import { apiFetch, createMilestone, createScene, getMilestoneDate, isoDay } from './builders'
 
 test.use({ viewport: { width: 1600, height: 900 }, colorScheme: 'light' })

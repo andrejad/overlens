@@ -7,8 +7,9 @@
 //
 // Login budget: logging in as a new user happens through the real login dialog, and only with the right
 // password.
-import { expect, test, type Page } from '@playwright/test'
-import { apiFetch, createDeliverable, teamRoadmap, createTeam, createWorkstream, isoDay, ANON_STATE } from './builders'
+import type { Page } from '@playwright/test'
+import { expect, test } from './fixtures'
+import { apiFetch, createDeliverable, teamRoadmap, createTeam, createWorkstream, isoDay, ANON_STATE, freezeClock } from './builders'
 
 test.use({ viewport: { width: 1600, height: 1000 }, colorScheme: 'light' })
 
@@ -57,6 +58,7 @@ test.describe('REQ_AUTH_013 REQ_AUTH_014 REQ_AUTH_015 users card', () => {
 
     // the new admin logs in through the login dialog, in a context of its own, with the reset password
     const ctx = await browser.newContext({ baseURL: baseURL!, storageState: ANON_STATE })
+    await freezeClock(ctx)
     const other = await ctx.newPage()
     await other.goto('/#/')
     await other.locator('[data-testid=login-button]').click()
@@ -90,6 +92,7 @@ test('REQ_FE_080 renaming an icon label in the admin card shows the new label on
 
     // an anonymous visitor sees it at once, as the hover title and the accessible name
     const ctx = await browser.newContext({ baseURL: baseURL!, storageState: ANON_STATE, viewport: { width: 1600, height: 900 } })
+    await freezeClock(ctx)
     const anon = await ctx.newPage()
     await anon.goto(`/#/teams/${team.id}`)
     const ic = anon.locator('.deliverable:not(.dup) .ic[data-icon=star]')

@@ -28,8 +28,8 @@ func Test_REQ_CFG_008_roll_stat_error_through_the_real_handler_does_not_deadlock
 	if err := os.WriteFile(stale, []byte("yesterday\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	yesterday := time.Now().Add(-24 * time.Hour)
-	if err := os.Chtimes(stale, yesterday, yesterday); err != nil {
+	twoDaysAgo := time.Now().Add(-48 * time.Hour) // 48h, not 24h: a DST change can make 24h back the same date
+	if err := os.Chtimes(stale, twoDaysAgo, twoDaysAgo); err != nil {
 		t.Fatal(err)
 	}
 

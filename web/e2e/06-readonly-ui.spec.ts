@@ -2,7 +2,7 @@
 //
 // Green since slice 6c (AuthProvider hides edit controls for anonymous visitors). Runs in its own
 // project, `readonly-ui`, with NO storageState (a fresh, logged-out browser context). Run it alone with: npx playwright test --grep REQ_FE_083 --no-deps
-import { expect, test } from '@playwright/test'
+import { expect, test } from './fixtures'
 import { createDeliverable, createDependency, teamRoadmap, createTeam, createWorkstream, isoDay } from './builders'
 
 test.use({ viewport: { width: 1600, height: 900 }, colorScheme: 'light' })

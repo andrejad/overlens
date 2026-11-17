@@ -7,7 +7,7 @@
 // from the real API via builders.ts (REQ_TEST_016/017): a fresh team/roadmap/two workstreams and one
 // deliverable spanning both, which is exactly what makes the packer render a primary block plus a
 // `.dup` copy (REQ_FE_051).
-import { expect, test } from '@playwright/test'
+import { expect, test } from './fixtures'
 import { createDeliverable, isoDay, teamRoadmap, createTeam, createWorkstream } from './builders'
 import { findOverlaps, measureScript, visibleBoxes } from './visibility'
 

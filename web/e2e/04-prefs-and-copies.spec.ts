@@ -1,7 +1,8 @@
 // Browser-remembered preferences (REQ_FE_071) and how copies look (REQ_FE_050), on the real app.
 // Data is built through the API (builders.ts); each test runs in a fresh browser context, so its
 // localStorage starts empty.
-import { expect, test, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test } from './fixtures'
 import { createDeliverable, createScene, isoDay, type TeamHandle } from './builders'
 
 test.use({ viewport: { width: 1600, height: 900 }, colorScheme: 'light' })

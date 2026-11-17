@@ -3,8 +3,9 @@
 // app's API (builders.ts: random names, days relative to today). A milestone created without a status is planned.
 //
 // Scene (one workstream): P today+0..14 -> M today+25 -> Q today+40..55.
-import { expect, test, type Locator, type Page } from '@playwright/test'
-import { apiFetch, asItem, createDeliverable, createItemDependency, createMilestone, createScene, getMilestoneDate, isoDay, type MilestoneHandle, ANON_STATE } from './builders'
+import type { Locator, Page } from '@playwright/test'
+import { expect, test } from './fixtures'
+import { apiFetch, asItem, createDeliverable, createItemDependency, createMilestone, createScene, getMilestoneDate, isoDay, type MilestoneHandle, ANON_STATE, freezeClock } from './builders'
 import { findOverlaps, measureScript } from './visibility'
 
 test.use({ viewport: { width: 1600, height: 900 }, colorScheme: 'light' })
@@ -87,6 +88,7 @@ test("REQ_FE_040 REQ_FE_042 REQ_FE_010 a milestone's diamond shows its status on
   }
   // the read-only team roadmap: an anonymous visitor
   const ctx = await browser.newContext({ baseURL, storageState: ANON_STATE, viewport: { width: 1600, height: 900 } })
+  await freezeClock(ctx)
   const anon = await ctx.newPage()
   await anon.goto(`/#/teams/${team.id}`)
   await expect(ms(anon, M)).toBeVisible()

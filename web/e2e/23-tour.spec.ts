@@ -2,7 +2,8 @@
 // visible element, the steps must be exactly the expected ones in order, and the tour must never send a write request
 // to the API. The tour is started with the Help button (REQ_FE_129); the shared setup marks it as seen so it never
 // opens by itself in other specs.
-import { expect, test, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test } from './fixtures'
 import { ADMIN_STATE, ANON_STATE, apiFetch, createDeliverable, createDependency, createMilestone, createTeam, createWorkstream, isoDay, teamRoadmap } from './builders'
 
 test.use({ viewport: { width: 1600, height: 1000 }, colorScheme: 'light' })

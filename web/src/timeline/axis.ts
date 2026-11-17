@@ -41,6 +41,11 @@ export function addDate(day: Day, years: number, months = 0): Day {
   const [y, m, d] = parts(day)
   return fromParts(y + years, m + months, d)
 }
+// Months on, clamped to the target month's last day (31 May - 3 months = 28/29 Feb), unlike addDate's overflow.
+export function addMonths(day: Day, months: number): Day {
+  const [y, m, d] = parts(day)
+  return Math.min(fromParts(y, m + months, d), fromParts(y, m + months + 1, 0))
+}
 // The day after / before, for the inclusive-end rules (a deliverable ending on day e is followed by e + 1).
 export const nextDay = (day: Day): Day => day + 1
 export const prevDay = (day: Day): Day => day - 1
@@ -148,8 +153,8 @@ export function todayX(view: View, today: Day): number | null {
 // The grid shows whole months from the earliest to the latest date (REQ_FE_060/063); an empty roadmap
 // shows 3 months before today to 9 months after (REQ_FE_061).
 export function gridFor(min: Day | null, max: Day | null, today: Day): Grid {
-  const lo = min ?? addDate(today, 0, -3)
-  const hi = max ?? addDate(today, 0, 9)
+  const lo = min ?? addMonths(today, -3)
+  const hi = max ?? addMonths(today, 9)
   const start = monthStart(lo)
   return { start, days: monthEnd(hi) - start + 1 }
 }

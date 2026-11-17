@@ -2,9 +2,8 @@
 
 **One page that shows who is accountable for which deliverable, by when, and who is waiting on whom.**
 
-Overlens helps teams working together on complex projects stay transparent and accountable for their part of the work.
-Every team's deliverables, milestones and dependencies sit on one timeline, each with a date and one accountable owner.
-It is built on one simple rule: one deliverable has exactly one accountable person.
+Overlens helps teams and leaders working together on complex projects stay transparent and accountable for their part of the work.
+Every team's deliverables, milestones and dependencies sit on one timeline, each with a date and one accountable owner. Overlens makes it clear what needs to be done in order to reach milestones.
 
 What Overlens is not:
 - Not an aggregation layer on top of Jira or other tracking systems.
@@ -13,23 +12,24 @@ What Overlens is not:
 
 ## See it in three steps
 
-**1. Start with the milestones.** The dates your company commits to, and nothing else.
+**1. Start with the milestones.** The dates your company or department commits to, and nothing else.
 
 ![Milestones only: the dates that matter, one row per workstream](docs/images/milestones-only.png)
 
 **2. Open one milestone.** Click a milestone to see only what leads to it: the deliverables it waits on, who is
-accountable for each, and which links are tight or at risk. Everything unrelated is hidden.
+accountable for each, and which links are tight or at risk. Everything unrelated is hidden. If a team that should be
+part of it is missing from that picture, you see it now, not at the deadline.
 
 ![Beta launch: its prerequisites, their owners and status](docs/images/milestones-view.png)
 
-**3. Then the whole picture.** Every team's deliverables, milestones and dependencies on one timeline. Select any item
+**3. Then the whole picture.** You can see every team's deliverables, milestones and dependencies on one timeline. Select any item
 to see its dates, owner and what it depends on.
 
 ![The company view: every team's deliverables, milestones and dependencies on one timeline](docs/images/company-view.png)
 
 ## Who it's for
 
-Leaders who need to see progress towards company goals, and want everyone to see who is accountable for each step.
+Leaders and teams who need to see progress toward company goals, and want everyone to see who is accountable for each step.
 
 Ticketing systems are built for tasks, not high-level objectives. When progress is reported and aggregated through hundreds of tasks and epics,
 ownership dissolves into detail and nobody owns the whole outcome. When something slips, teams blame each other for not
@@ -41,6 +41,10 @@ products tied to one vendor's ecosystem. Overlens stays at the level that matter
 accountable person, one date, visible to the whole organization without an account. Every team is free to organize their
 work as they see fit, but their commitments to each other and high-level goals come together in Overlens.
 
+Overlens is a tool, not a planning process. People still decide what the goals are, assess what is technically
+possible, and agree on who delivers what by when. Overlens doesn't do that work for them: it makes the result of
+those conversations visible, keeps it current, and shows the moment it stops adding up.
+
 ## What you get
 
 - **The whole portfolio on one page**, with status and risk at a glance.
@@ -48,7 +52,9 @@ work as they see fit, but their commitments to each other and high-level goals c
 
   ![Assistant Rollout traced back through everything it depends on](docs/images/trace-dependencies.png)
 
-- **Milestones for the meeting**: what leads to each one, who owns each part, what is late or at risk.
+- **Gaps you can spot early**: when a big milestone has nothing leading to it from a team that will clearly be needed,
+  or a deliverable has no accountable person, it is visible in Overlens while there is still time to act.
+- **Status updates and meetings focused on the outcomes**: what leads to each one, who owns each part, what is late or at risk.
 - **Ask your AI assistant**: connect Claude or any MCP assistant and ask in plain language, for example "What is late or
   at risk?" or "What is Beta launch waiting on?". The MCP is read only.
 - **Free and open source** (MIT).
@@ -79,7 +85,7 @@ one program.
 If your company already runs containers, it fits there too: Docker (with Docker Compose or Portainer), CapRover or
 Kubernetes. Every route, step by step, is in [docs/DEPLOY.md](docs/DEPLOY.md).
 
-## Run from source (about five minutes)
+## Run from source (for developers)
 
 You need Go 1.27 and Node 22 with npm.
 
@@ -105,6 +111,6 @@ the tests (`make test`), is in [docs/DEVELOP.md](docs/DEVELOP.md).
 - [CHANGELOG.md](CHANGELOG.md) — what changed in each release
 - [AGENTS.md](AGENTS.md) — for AI agents: where everything is, how to build and test, the rules for changes
 
-## Licence
+## License
 
 MIT, see [LICENSE](LICENSE).

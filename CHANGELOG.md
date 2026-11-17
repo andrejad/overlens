@@ -5,6 +5,14 @@ All notable changes to Overlens are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.2.3] — 2026-11-17
+
+### Changed
+- The README explains more clearly what Overlens is for and what it is not: a tool that makes the teams' commitments visible, not a planning process.
+
+### Fixed
+- On some month-end days (such as 31 May or 31 July), an empty roadmap's window was shifted one month late: it showed one month less of the past and one month more of the future than intended.
+
 ## [1.2.2] — 2026-11-14
 
 ### Changed

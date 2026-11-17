@@ -27,6 +27,7 @@ CONF="$ERM_E2E_DIR/overlens.conf"
 # OVERLENS_* variable first, then set exactly the ones the tests rely on.
 for v in $(compgen -e | grep '^OVERLENS_' || true); do unset "$v"; done
 
+export TZ="${TZ:-Europe/Amsterdam}" # REQ_TEST_024: the same zone as every test layer
 export OVERLENS_BOOTSTRAP_ADMIN_USER="e2e-admin"
 export OVERLENS_BOOTSTRAP_ADMIN_PASSWORD="e2e-admin-password"
 export OVERLENS_SAMPLE_DATA=false # REQ_TEST_020: the shipped sample company never appears in a browser test

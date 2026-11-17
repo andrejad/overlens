@@ -7,7 +7,8 @@
 //
 // Runs in the `company-ui` project (logged in as e2e-admin).
 // Anonymous checks use fresh contexts without storageState.
-import { expect, test, type Browser, type Page } from '@playwright/test'
+import type { Browser, Page } from '@playwright/test'
+import { expect, test } from './fixtures'
 import {
   apiFetch,
   createCompany,
@@ -18,6 +19,7 @@ import {
   type Company,
   type DeliverableHandle,
   ANON_STATE,
+  freezeClock,
 } from './builders'
 import { measureScript } from './visibility'
 
@@ -72,6 +74,7 @@ async function setArrows(page: Page, on: boolean) {
 
 async function anonymousPage(browser: Browser, baseURL: string) {
   const ctx = await browser.newContext({ baseURL, storageState: ANON, viewport: { width: 1600, height: 1000 } })
+  await freezeClock(ctx)
   return { ctx, page: await ctx.newPage() }
 }
 

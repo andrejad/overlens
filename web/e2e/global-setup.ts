@@ -14,7 +14,8 @@
 // and writes a Playwright storageState file so the real-app browser projects start out logged in.
 import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { ADMIN_PASSWORD, ADMIN_STATE, ADMIN_USER, ANON_STATE, login } from './builders'
+import { ADMIN_PASSWORD, ADMIN_STATE, ADMIN_USER, ANON_STATE, login, testSeed } from './builders'
+import { testToday } from '../src/testToday'
 
 // REQ_FE_130: the guided tour opens by itself on a first visit; every browser test starts with it already seen
 // (the tour's own spec starts it with the Help button). ANON_STATE is the default for projects without a login.
@@ -22,6 +23,9 @@ const SEEN_ORIGIN = (baseURL: string) => ({ origin: new URL(baseURL).origin, loc
 
 export default async function globalSetup(config: { projects: { use: { baseURL?: string } }[] }) {
   process.env.LOG_PREFIX = 'test'
+  // REQ_TEST_024: one seed for every worker (set before they start), so the data and the frozen clock agree.
+  process.env.TEST_SEED ||= String(testSeed())
+  console.log(`TEST_SEED=${process.env.TEST_SEED} (frozen today ${testToday(testSeed()).toDateString()}, TZ=${process.env.TZ})`)
   const sentinel = join(process.cwd(), '.e2e-tmp', 'dir')
   process.env.ERM_E2E_DIR = readFileSync(sentinel, 'utf8').trim()
 

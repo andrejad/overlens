@@ -4,7 +4,8 @@
 // and move-only delete (14-manage-workstreams), the view mode and the Manage workstreams page's read-only and last-workstream
 // cases (the Vitest tests), the theme toggle itself (TopBar.test.tsx, REQ_FE_104).
 // Runs in the `side-panel-ui` project (logged in as e2e-admin).
-import { expect, test, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test } from './fixtures'
 import { apiFetch, createDeliverable, createScene, isoDay } from './builders'
 
 test.use({ viewport: { width: 1600, height: 1000 }, colorScheme: 'light' })

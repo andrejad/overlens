@@ -1,8 +1,9 @@
 // REQ_FE_140 and REQ_FE_141 on the REAL running app, where the browser does the layout: a name that doesn't fit on one
 // row goes small on at most two rows inside its bar and is cut there, or under a narrow bar; the bar keeps its size. Data
 // comes from the real API via builders.ts.
-import { expect, test } from '@playwright/test'
-import { apiFetch, createDeliverable, createMilestone, createScene, isoDay } from './builders'
+import { expect, test } from './fixtures'
+import { apiFetch, createDeliverable, createMilestone, createScene, isoDay, testSeed } from './builders'
+import { testToday } from '../src/testToday'
 
 test('REQ_FE_140 a long name on a narrow bar shows small on two rows inside the bar and is cut there; on a wide bar it stays on one row', async ({ page, baseURL }) => {
   const url = baseURL!
@@ -69,7 +70,8 @@ test('REQ_FE_141 REQ_FE_010 names under narrow bars sit in the gap and touch not
   const w = ws[0].id
   const row = (n: number) => ({ rows: { [w]: n } })
   // anchored to the month start, not today: the grid ends at a month's end, and where the last bar falls in it decided whether its name could sit centred
-  const fromMonthStart = (n: number) => isoDay(n - (new Date().getDate() - 1))
+  const monthStartOffset = -(testToday(testSeed()).getDate() - 1)
+  const fromMonthStart = (n: number) => isoDay(n + monthStartOffset)
   // row 0: a free name, one cut by the next, and one with a milestone after it
   const free = await createDeliverable(url, roadmap, [w], fromMonthStart(2), fromMonthStart(15), { name: 'Disaster Recovery Drills And More', ...row(0) })
   const cut = await createDeliverable(url, roadmap, [w], fromMonthStart(90), fromMonthStart(103), { name: 'Regional Failover Rehearsal', ...row(0) })
