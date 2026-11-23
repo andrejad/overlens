@@ -205,6 +205,39 @@
             }
           },
           {
+            "from": {
+              "external": {
+                "team": "Mobile",
+                "name": "Offline Mode"
+              }
+            },
+            "to": {
+              "milestone": "beta-launch"
+            }
+          },
+          {
+            "from": {
+              "external": {
+                "team": "Data Engineering",
+                "name": "Usage Dashboard"
+              }
+            },
+            "to": {
+              "milestone": "beta-launch"
+            }
+          },
+          {
+            "from": {
+              "external": {
+                "team": "Infrastructure",
+                "name": "Disaster Recovery Drills"
+              }
+            },
+            "to": {
+              "milestone": "beta-launch"
+            }
+          },
+          {
             "from": "billing",
             "to": "planning-tool"
           },

@@ -5,6 +5,12 @@ All notable changes to Overlens are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.2.4] — 2026-11-22
+
+### Changed
+- The README is shorter and says more directly who Overlens is for: teams and leaders whose work toward a shared goal depends on each other.
+- In the sample company, the "Beta launch" milestone now depends on work from four teams across all three workstreams, so tracing it shows a realistic cross-team chain. Existing installations are not changed.
+
 ## [1.2.3] — 2026-11-17
 
 ### Changed

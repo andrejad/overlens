@@ -485,8 +485,8 @@ func Test_REQ_DEMO_016_REQ_DEMO_017_development_company_file_loads(t *testing.T)
 			ws[strings.ToLower(w.Name)] = true
 		}
 	}
-	if res.Teams != 5 || len(ws) != 3 || res.Counts.Deliverables != 30 || res.Counts.Milestones != 6 || res.Counts.Dependencies != 17 {
-		t.Errorf("teams %d, workstream names %d, deliverables %d, milestones %d, dependencies %d (want 5, 3, 30, 6, 17)",
+	if res.Teams != 5 || len(ws) != 3 || res.Counts.Deliverables != 30 || res.Counts.Milestones != 6 || res.Counts.Dependencies != 20 {
+		t.Errorf("teams %d, workstream names %d, deliverables %d, milestones %d, dependencies %d (want 5, 3, 30, 6, 20)",
 			res.Teams, len(ws), res.Counts.Deliverables, res.Counts.Milestones, res.Counts.Dependencies)
 	}
 }
